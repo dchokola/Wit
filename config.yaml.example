@@ -1,0 +1,19 @@
+---
+:title: Wit
+:groups:
+- My FooBar:
+    :repos:
+    - Foo:
+        :path: /foo/.git/
+        :description: Implements FooClass.
+        :owner: John Doe
+    - Bar:
+        :path: /bar/.git/
+        :description: Implements BarClass.
+        :owner: Apanap Korvarsson
+- My Baz:
+    :repos:
+    - Baz:
+        :path: /baz/.git/
+        :description: Optional BarClass addon.
+        :owner: Jane Doe
