@@ -18,10 +18,9 @@ class Wit
 		conf = config
 		conf[:title] ||= 'Wit'
 
-		File.open(CONFIGFILE, 'w+') do |f|
-			cfg = conf.to_yaml
-			f.write(cfg) if(f.read != cfg)
-		end if(File.writable?(CONFIGFILE))
+		if(File.writable?(CONFIGFILE) && YAML.load_file(CONFIGFILE) != conf)
+			File.open(CONFIGFILE, 'w') { |f| f.write(conf.to_yaml) }
+		end
 
 		CGI.escapeHTML(conf[:title])
 	end
@@ -177,9 +176,8 @@ class Wit
 
 		@config[:groups][g][@group][:repos][r][@name] = @repoconfig
 
-		File.open(CONFIGFILE, 'w+') do |f|
-			conf = @config.to_yaml
-			f.write(conf) if(f.read != conf)
-		end if(File.writable?(CONFIGFILE))
+		if(File.writable?(CONFIGFILE) && YAML.load_file(CONFIGFILE) != @config)
+			File.open(CONFIGFILE, 'w') { |f| f.write(@config.to_yaml) }
+		end
 	end
 end
