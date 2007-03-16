@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require 'cgi'
-require 'date'
 require 'yaml'
 
 require 'git'
@@ -83,8 +82,8 @@ class Wit
 
 		wit = self.new(group, repo)
 		[wit.commits(show, start)].flatten.each_with_index do |commit, i|
-			time = commit[:committer_time] ||commit[:author_time]
-			time = time ? time.strftime(timefmt) : ''
+			time = commit[:committer_time] || commit[:author_time]
+			time = time ? time.utc.strftime(timefmt) : ''
 			title = commit[:title]
 			title = title[0..MAX_COMMIT_TITLE_LENGTH - 3] + '...' if(title && title.length > MAX_COMMIT_TITLE_LENGTH)
 			info = time, commit[:author] || commit[:committer], title
@@ -145,7 +144,7 @@ class Wit
 	end
 
 	def last_update
-		difference = ((DateTime.now - commits[:committer_time]).to_f * 24 * 60 * 60).to_i
+		difference = (Time.now - commits[:committer_time]).to_i
 
 		if(difference < div = 60)
 			'right now'
@@ -240,7 +239,7 @@ class Wit
 		if(author)
 			ary.shift
 			commit[:author], commit[:author_email] = author[1..2]
-			commit[:author_time] = DateTime.strptime(author[3], '%s')#.new_offset(author[4].to_f / 24)
+			commit[:author_time] = Time.at(author[3].to_i)
 		end
 
 		if(ary.empty?)
@@ -252,7 +251,7 @@ class Wit
 		if(committer)
 			ary.shift
 			commit[:committer], commit[:committer_email] = committer[1..2]
-			commit[:committer_time] = DateTime.strptime(committer[3], '%s')#.new_offset(committer[4].to_f / 24)
+			commit[:committer_time] = Time.at(committer[3].to_i)
 		end
 
 		commit[:title] = ary.shift unless(ary.empty? || ary.first.match(/^commit/))
