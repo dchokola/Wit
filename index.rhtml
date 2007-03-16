@@ -14,26 +14,26 @@ Content-type: text/html; charset=UTF-8
 </a>
 <a href="."><%=Wit.title%></a>
 </div>
-<table>
-<tr colspan="5">
+<table cellspacing="0">
+<tr>
 <th>Title</th>
 <th>Description</th>
 <th>Last Commit</th>
 <th>Owner</th>
 <th>Updated</th>
 </tr>
-<%Wit.groups do |group|%><tr><td class="group" colspan="6"><%=group%></td>
-<%Wit.repos(group) do |repo|%><tr>
+<%Wit.groups do |group|%><tr><td class="group" colspan="6"><%=group%></td></tr>
+<%Wit.repos(group) do |fmt, repo|%><tr class="<%=fmt%>">
 <td><%=repo.name%></td>
 <td><%=repo.description%></td>
 <td><%=repo.last_commit%></td>
 <td><%=repo.owner%></td>
 <td><%=repo.last_update%></td>
 <td><a class="default" href="commits.rhtml?group=<%=group%>&repo=<%=repo.name%>">commits</a> | <a class="default" href="tree.rhtml?group=<%=group%>&repo=<%=repo.name%>">tree</a> | <a class="default" href="snapshot.rhtml?group=<%=group%>&repo=<%=repo.name%>">snapshot</a></td>
-</tr><%repo.close
-end%>
-</tr><%end%>
-</table>
+</tr>
+<%repo.close
+end%></tr>
+<%end%></table>
 <div class="footer">
 <a class="opml" href="opml.rhtml">OPML</a>
 </div>

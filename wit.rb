@@ -40,10 +40,10 @@ class Wit
 	def self.repos(group)
 		repos = []
 
-		config[:groups].find { |h| h.has_key?(group) }[group][:repos].each do |repo_config|
+		config[:groups].find { |h| h.has_key?(group) }[group][:repos].each_with_index do |repo_config, i|
 			repo = self.new(group, repo_config.keys.first)
 			repos.push(repo)
-			yield(repo) if(block_given?)
+			yield(i % 2 == 0 ? 'odd' : 'even', repo) if(block_given?)
 		end
 
 		repos
