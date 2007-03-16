@@ -76,8 +76,8 @@ class Wit
 		save_config_if_changed(conf)
 
 		commits = self.new(group, repo).commits(show + 1, start)
-		last = commits.pop
-		if(last && commits && last[:hash] != commits.last[:hash])
+		last = commits.is_a?(Array) ? commits.pop : commits
+		if(commits.is_a?(Array) && last && commits && last[:hash] != commits.last[:hash])
 			yield(group, repo, last[:hash]) if(block_given?)
 			last[:hash]
 		end
