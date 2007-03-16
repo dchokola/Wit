@@ -32,6 +32,12 @@ Content-type: text/html; charset=UTF-8
 <td><a class="default" href="diff.rhtml?group=<%=%>&repo=<%=%>">diff</a> | <a class="default" href="tree.rhtml?group=<%=%>&repo=<%=%>">tree</a> | <a class="default" href="snapshot.rhtml?group=<%=%>&repo=<%=%>">snapshot</a></td>
 </tr>
 <%end%></table>
+<div class="branches">Branches</div>
+<table cellspacing="0" class="branches"><%Wit.branches do |fmt, group, repo, branch|%>
+<tr class="<%=fmt%>"><td class="branch">
+<a href="commits.rhtml?group=<%=group%>&repo=<%=repo%>&start=<%=branch%>"><%=branch%></a>
+</td></tr><%end%>
+</table>
 <div class="footer">
 <a class="opml" href="opml.rhtml">OPML</a><%Wit.next_page do |group, repo, commit|%>
 <a href="commits.rhtml?group=<%=group%>&repo=<%=repo%>&start=<%=commit%>">Next</a><%end%>

@@ -62,6 +62,8 @@ class Wit
 		conf = config
 		group, repo, show, start = cgi_params(conf)
 
+		save_config_if_changed(conf)
+
 		yield(group, repo) if(block_given?)
 		[group, repo]
 	end
@@ -83,6 +85,17 @@ class Wit
 
 			info.map { |c| CGI.escapeHTML(c || '') }
 			yield(i % 2 == 0 ? 'odd' : 'even', *info)
+		end
+	end
+
+	def self.branches
+		conf = config
+		group, repo, show, start = cgi_params(conf)
+
+		save_config_if_changed(conf)
+
+		self.new(group, repo).branches.each_with_index do |branch, i|
+			yield(i % 2 == 0 ? 'odd' : 'even', group, repo, CGI.escapeHTML(branch))
 		end
 	end
 
