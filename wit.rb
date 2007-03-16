@@ -126,7 +126,7 @@ class Wit
 		@repoconfig = @config[:groups].find do |g|
 			g.has_key?(@group)
 		end[@group][:repos].find { |h| h.has_key?(@name) }[@name]
-		@git = Git.new(@repoconfig[:path])
+		@git = Git.new(@config[:git_bin] ||= 'git', @repoconfig[:path])
 	end
 
 	def description
