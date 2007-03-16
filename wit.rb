@@ -49,6 +49,15 @@ class Wit
 		repos
 	end
 
+	def self.repo_info
+		conf = config
+		group, repo, show, start = cgi_params(conf)
+
+		self.new(group, repo).repo_config.each do |key, val|
+			yield(CGI.escapeHTML(key.to_s), CGI.escapeHTML(val)) if(block_given?)
+		end
+	end
+
 	def self.commits
 		conf = config
 		timefmt = conf[:commit_time_format] ||= '%Y/%m/%d'
@@ -140,7 +149,7 @@ class Wit
 		@git.repo_config('--list').split("\n").each do |prop|
 			key, value = prop.split('=')
 			config[key.to_sym] = value
-			yield(CGI.excapeHTML(key), CGI.excapeHTML(value)) if(block_given?)
+			yield(CGI.escapeHTML(key), CGI.escapeHTML(value)) if(block_given?)
 		end
 
 		config
