@@ -70,7 +70,7 @@ class Wit
 
 	def self.commits
 		conf = config
-		timefmt = conf[:commit_time_format] ||= '%Y/%m/%d'
+		timefmt = conf[:commit_time_format] ||= '%Y/%m/%d %H:%M:%S'
 		group, repo, show, start = cgi_params(conf)
 
 		save_config_if_changed(conf)
