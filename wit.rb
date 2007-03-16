@@ -7,7 +7,9 @@ require 'yaml'
 require 'git'
 
 CONFIGFILE = 'config.yaml'
-MAX_TEXT_LENGTH = 33
+MAX_DESC_LENGTH = 33
+MAX_SHORT_CMT_LENGTH = 33
+MAX_COMMIT_TITLE_LENGTH = 83
 
 class Wit
 	def self.config
@@ -18,9 +20,7 @@ class Wit
 		conf = config
 		conf[:title] ||= 'Wit'
 
-		if(File.writable?(CONFIGFILE) && YAML.load_file(CONFIGFILE) != conf)
-			File.open(CONFIGFILE, 'w') { |f| f.write(conf.to_yaml) }
-		end
+		save_config_if_changed(conf)
 
 		CGI.escapeHTML(conf[:title])
 	end
@@ -49,6 +49,40 @@ class Wit
 		repos
 	end
 
+	def self.commits
+		conf = config
+		timefmt = conf[:commit_time_format] ||= '%Y/%m/%d'
+		group, repo, show, start = cgi_params(conf)
+
+		save_config_if_changed(conf)
+
+		wit = self.new(group, repo)
+		[wit.commits(show, start)].flatten.each_with_index do |commit, i|
+			time = commit[:committer_time] ||commit[:author_time]
+			time = time ? time.strftime(timefmt) : ''
+			title = commit[:title]
+			title = title[0..MAX_COMMIT_TITLE_LENGTH - 3] + '...' if(title && title.length > MAX_COMMIT_TITLE_LENGTH)
+			info = time, commit[:author] || commit[:committer], title
+
+			info.map { |c| CGI.escapeHTML(c || '') }
+			yield(i % 2 == 0 ? 'odd' : 'even', *info)
+		end
+	end
+
+	def self.next_page
+		conf = config
+		group, repo, show, start = cgi_params(conf)
+
+		save_config_if_changed(conf)
+
+		commits = self.new(group, repo).commits(show + 1, start)
+		last = commits.pop
+		if(last && commits && last[:hash] != commits.last[:hash])
+			yield(group, repo, last[:hash]) if(block_given?)
+			last[:hash]
+		end
+	end
+
 	attr_reader(:config, :group, :name)
 
 	def initialize(group, name)
@@ -62,12 +96,12 @@ class Wit
 
 	def description
 		desc = CGI.escapeHTML(@repoconfig[:description] ||= '')
-		desc.length > MAX_TEXT_LENGTH ? desc[0..MAX_TEXT_LENGTH - 3] + '...' : desc
+		desc.length > MAX_DESC_LENGTH ? desc[0..MAX_DESC_LENGTH - 3] + '...' : desc
 	end
 
 	def last_commit
 		com = CGI.escapeHTML(commits[:title])
-		com.length > MAX_TEXT_LENGTH ? com[0..MAX_TEXT_LENGTH - 3] + '...' : com
+		com.length > MAX_SHORT_CMT_LENGTH ? com[0..MAX_SHORT_CMT_LENGTH - 3] + '...' : com
 	end
 
 	def owner
@@ -116,7 +150,7 @@ class Wit
 		commits = []
 
 		if(num > 0)
-			ary = @git.rev_list('-n', '1', '--pretty=raw', start).split("\n")
+			ary = @git.rev_list('-n', num, '--pretty=raw', start).split("\n")
 		else
 			ary = @git.rev_list('--pretty=raw', start).split("\n")
 		end
@@ -139,28 +173,54 @@ class Wit
 
 	private
 
+	def self.save_config_if_changed(conf)
+		if(File.writable?(CONFIGFILE) && YAML.load_file(CONFIGFILE) != conf)
+			File.open(CONFIGFILE, 'w') { |f| f.write(conf.to_yaml) }
+		end
+	end
+
+	def self.cgi_params(conf)
+		params = CGI.new.params
+
+		[params['group'].first,
+		 params['repo'].first,
+		 (params['show'].first || conf[:commits_per_page] ||= 50).to_i,
+		 params['start'].first || 'master']
+	end
+
 	def commitdata(ary)
 		commit = { :hash => ary.shift.split.last,
 		           :tree => ary.shift.split.last,
-		           :parent => ary.shift.split.last
-		}
+		           :parent => ary.shift.split.last }
+		commit[:parent] = [commit[:parent]] if(ary.first.match(/^parent/))
+		commit[:parent].push(ary.shift.split.last) while(ary.first.match(/^parent/))
 
-		author = ary.first.match(/^author\s+(.+?)\s+<(.+?)>\s+(\d+)\s*(.*)$/i) unless(ary.empty?)
+		if(ary.empty?)
+			author = nil
+		else
+			author = ary.first.match(/^author\s+(.+?)\s+<(.+?)>\s+(\d+)\s*(.*)$/)
+			author = ary.first.match(/^author\s+()<(.+?)>\s+(\d+)\s*(.*)$/) unless(author)
+		end
 		if(author)
 			ary.shift
 			commit[:author], commit[:author_email] = author[1..2]
-			commit[:author_time] = DateTime.strptime(author[3], '%s').new_offset(author[4].to_i)
+			commit[:author_time] = DateTime.strptime(author[3], '%s')#.new_offset(author[4].to_f / 24)
 		end
 
-		committer = ary.first.match(/^committer\s+(.+?)\s+<(.+?)>\s+(\d+)\s*(.*)$/i) unless(ary.empty?)
+		if(ary.empty?)
+			committer = nil
+		else
+			committer = ary.first.match(/^committer\s+(.+?)\s+<(.+?)>\s+(\d+)\s*(.*)$/)
+			committer = ary.first.match(/^committer\s+()<(.+?)>\s+(\d+)\s*(.*)$/) unless(committer)
+		end
 		if(committer)
 			ary.shift
 			commit[:committer], commit[:committer_email] = committer[1..2]
-			commit[:committer_time] = DateTime.strptime(committer[3], '%s').new_offset(committer[4].to_i)
+			commit[:committer_time] = DateTime.strptime(committer[3], '%s')#.new_offset(committer[4].to_f / 24)
 		end
 
-		commit[:title] = ary.shift unless(ary.empty?)
-		while(!ary.empty? && !ary.first.match(/^commit/i))
+		commit[:title] = ary.shift unless(ary.empty? || ary.first.match(/^commit/))
+		while(!ary.empty? && !ary.first.match(/^commit/))
 			commit[:description] = [commit[:description], ary.shift].join(' ')
 		end
 		commit[:description].lstrip if(commit[:description])

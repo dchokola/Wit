@@ -1,1 +1,34 @@
-
+Content-type: text/html; charset=UTF-8
+<%require 'wit'%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<meta name="robots" content="index, nofollow"/>
+<link rel="stylesheet" type="text/css" href="style/gitweb.css"/>
+<title><%=Wit.title%></title>
+</head>
+<body>
+<div class="header">
+<a href="http://www.kernel.org/pub/software/scm/git/docs/" title="git documentation">
+<img src="images/git.png" alt="git" class="logo"/>
+</a>
+<a href="."><%=Wit.title%></a>
+</div>
+<table>
+<tr colspan="3">
+<th>Commit Time</th>
+<th>Committer</th>
+<th>Summary</th>
+</tr>
+<%Wit.commits do |fmt, time, committer, summary|%><tr class="<%=fmt%>">
+<td><%=time%></td>
+<td><%=committer%></td>
+<td><%=summary%></td>
+<td><a class="default" href="diff.rhtml?group=<%=%>&repo=<%=%>">diff</a> | <a class="default" href="tree.rhtml?group=<%=%>&repo=<%=%>">tree</a> | <a class="default" href="snapshot.rhtml?group=<%=%>&repo=<%=%>">snapshot</a></td>
+</tr>
+<%end%></table>
+<div class="footer">
+<a class="opml" href="opml.rhtml">OPML</a><%Wit.next_page do |group, repo, commit|%>
+<a href="commits.rhtml?group=<%=group%>&repo=<%=repo%>&start=<%=commit%>">Next</a><%end%>
+</div>
+</html>

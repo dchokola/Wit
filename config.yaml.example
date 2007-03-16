@@ -1,5 +1,7 @@
 ---
 :title: Wit
+:commits_per_page: 50
+:commit_time_format: "%Y/%m/%d"
 :groups:
 - My FooBar:
     :repos:
