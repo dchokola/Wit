@@ -58,6 +58,14 @@ class Wit
 		end
 	end
 
+	def self.repo_title
+		conf = config
+		group, repo, show, start = cgi_params(conf)
+
+		yield(group, repo) if(block_given?)
+		[group, repo]
+	end
+
 	def self.commits
 		conf = config
 		timefmt = conf[:commit_time_format] ||= '%Y/%m/%d'
