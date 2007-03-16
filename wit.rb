@@ -52,8 +52,14 @@ class Wit
 	def self.repo_info
 		conf = config
 		group, repo, show, start = cgi_params(conf)
+		wit = self.new(group, repo)
 
-		self.new(group, repo).repo_config.each do |key, val|
+		save_config_if_changed(conf)
+
+		{ 'Group' => group,
+		  'Name' => repo,
+		  'Description' => wit.repoconfig[:description],
+		  'Last modified' => wit.last_update }.each do |key, val|
 			yield(CGI.escapeHTML(key.to_s), CGI.escapeHTML(val)) if(block_given?)
 		end
 	end
@@ -113,7 +119,7 @@ class Wit
 		end
 	end
 
-	attr_reader(:config, :group, :name)
+	attr_reader(:config, :repoconfig, :group, :name)
 
 	def initialize(group, name)
 		@config = YAML.load_file(File.expand_path(CONFIGFILE))
