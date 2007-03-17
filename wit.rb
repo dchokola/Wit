@@ -9,19 +9,21 @@ MAX_SHORT_CMT_LENGTH = 33
 MAX_COMMIT_TITLE_LENGTH = 83
 
 class Wit
-	def self.config
-		YAML.load_file(CONFIGFILE)
-	end
+	CONFIG = YAML.load_file(CONFIGFILE)
+
+	# some default values
+	CONFIG[:title] ||= "Puzzles' Wit"
+	CONFIG[:commit_time_format] ||= '%Y/%m/%d %H:%M:%S'
+	CONFIG[:git_bin] ||= 'git'
+	CONFIG[:tab_width] ||= 4
+	CONFIG[:commits_per_page] ||= 50
 
 	def self.title
-		conf = config
-		conf[:title] ||= 'Wit'
-
-		CGI.escapeHTML(conf[:title])
+		CGI.escapeHTML(CONFIG[:title])
 	end
 
 	def self.groups
-		config[:groups].each do |group|
+		CONFIG[:groups].each do |group|
 			yield(group[:name]) if(block_given?)
 		end
 	end
@@ -29,7 +31,7 @@ class Wit
 	def self.repos(group)
 		repos = []
 
-		config[:groups].find { |h| h[:name] == group }[:repos].each_with_index do |repo, i|
+		CONFIG[:groups].find { |h| h[:name] == group }[:repos].each_with_index do |repo, i|
 			repo = new(group, repo[:name])
 			repos.push(repo)
 			yield(i % 2 == 0 ? 'odd' : 'even', repo) if(block_given?)
@@ -39,8 +41,7 @@ class Wit
 	end
 
 	def self.repo_info
-		conf = config
-		group, repo, show, start, branch = cgi_params(conf)
+		group, repo, show, start, branch = cgi_params
 		wit = new(group, repo)
 
 		{ 'Group' => group,
@@ -52,17 +53,15 @@ class Wit
 	end
 
 	def self.repo_title
-		conf = config
-		group, repo, show, start, branch = cgi_params(conf)
+		group, repo, show, start, branch = cgi_params
 
 		yield(group, repo, branch) if(block_given?)
 		[group, repo, branch]
 	end
 
 	def self.commits
-		conf = config
-		timefmt = conf[:commit_time_format] ||= '%Y/%m/%d %H:%M:%S'
-		group, repo, show, start, branch = cgi_params(conf)
+		timefmt = CONFIG[:commit_time_format]
+		group, repo, show, start, branch = cgi_params
 
 		wit = new(group, repo)
 		[wit.commits(show, start)].flatten.each_with_index do |commit, i|
@@ -78,8 +77,7 @@ class Wit
 	end
 
 	def self.branches
-		conf = config
-		group, repo, show, start, branch = cgi_params(conf)
+		group, repo, show, start, branch = cgi_params
 
 		new(group, repo).branches.each_with_index do |branch, i|
 			yield(i % 2 == 0 ? 'odd' : 'even', group, repo, CGI.escapeHTML(branch))
@@ -87,8 +85,7 @@ class Wit
 	end
 
 	def self.next_page
-		conf = config
-		group, repo, show, start, branch = cgi_params(conf)
+		group, repo, show, start, branch = cgi_params
 
 		commits = new(group, repo).commits(show + 1, start)
 		last = commits.is_a?(Array) ? commits.pop : commits
@@ -99,7 +96,6 @@ class Wit
 	end
 
 	def self.diff
-		conf = config
 		params = CGI.new.params
 		group = params['group'].first
 		repo =  params['repo'].first
@@ -119,7 +115,7 @@ class Wit
 			end
 
 			line = CGI.escapeHTML(line)
-			line.gsub!(/\t/, ' ' * conf[:tab_width] ||= 4)
+			line.gsub!(/\t/, ' ' * CONFIG[:tab_width])
 			yield(style, line) if(block_given?)
 		end
 
@@ -127,12 +123,11 @@ class Wit
 	end
 
 	def self.commit_info
-		conf = config
 		params = CGI.new.params
 		group = params['group'].first
 		repo =  params['repo'].first
 		head = params['head'].first
-		timefmt = conf[:commit_time_format] ||= '%Y/%m/%d %H:%M:%S'
+		timefmt = CONFIG[:commit_time_format]
 
 		Wit.new(group, repo).commits(1, head).sort { |a, b| a.to_s <=> b.to_s }.each do |prop|
 			(key, val) = prop
@@ -142,13 +137,12 @@ class Wit
 		end
 	end
 
-	attr_reader(:config, :repoconfig, :group, :name)
+	attr_reader(:repoconfig, :group, :name)
 
 	def initialize(group, name)
-		@config = YAML.load_file(File.expand_path(CONFIGFILE))
 		@group, @name = group, name
-		@repoconfig = @config[:groups].find { |g| g[:name] == @group }[:repos].find { |h| h[:name] == @name }
-		@git = Git.new(@config[:git_bin] ||= 'git', @repoconfig[:path])
+		@repoconfig = CONFIG[:groups].find { |g| g[:name] == @group }[:repos].find { |h| h[:name] == @name }
+		@git = Git.new(CONFIG[:git_bin], @repoconfig[:path])
 	end
 
 	def description
@@ -234,12 +228,12 @@ class Wit
 
 	private
 
-	def self.cgi_params(conf)
+	def self.cgi_params
 		params = CGI.new.params
 
 		[params['group'].first,
 		 params['repo'].first,
-		 (params['show'].first || conf[:commits_per_page] ||= 50).to_i,
+		 (params['show'].first || CONFIG[:commits_per_page]).to_i,
 		 params['start'].first || params['branch'].first || 'master',
 		 params['branch'].first || 'master']
 	end
@@ -286,13 +280,13 @@ class Wit
 	def save_config
 		g, r = 0, 0
 
-		@config[:groups].each_with_index { |grp, i| g = i if(grp[:name] == @group) }
-		@config[:groups][g][:repos].each_with_index { |repo, i| r = i if(repo[:name] == @name) }
+		CONFIG[:groups].each_with_index { |grp, i| g = i if(grp[:name] == @group) }
+		CONFIG[:groups][g][:repos].each_with_index { |repo, i| r = i if(repo[:name] == @name) }
 
-		@config[:groups][g][:repos][r] = @repoconfig
+		CONFIG[:groups][g][:repos][r] = @repoconfig
 
-		if(File.writable?(CONFIGFILE) && YAML.load_file(CONFIGFILE) != @config)
-			File.open(CONFIGFILE, 'w') { |f| f.write(@config.to_yaml) }
+		if(File.writable?(CONFIGFILE) && YAML.load_file(CONFIGFILE) != CONFIG)
+			File.open(CONFIGFILE, 'w') { |f| f.write(CONFIG.to_yaml) }
 		end
 	end
 end
