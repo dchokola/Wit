@@ -1,5 +1,3 @@
-#!/usr/bin/env ruby
-
 class Git
 	attr_accessor(:git_dir)
 
