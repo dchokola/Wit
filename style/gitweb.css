@@ -89,6 +89,32 @@ div.footer {
 	vertical-align: center;
 	background-color: #D9D8D1
 }
+div.purple {
+	font-family: monospace;
+	font-size: 9pt;
+	white-space: pre;
+	color: #990099;
+}
+div.red {
+	font-family: monospace;
+	font-size: 9pt;
+	white-space: pre;
+	color: #CC0000;
+}
+div.green {
+	font-family: monospace;
+	font-size: 9pt;
+	white-space: pre;
+	color: #008800;
+}
+div.diff {
+	font-family: monospace;
+	font-size: 9pt;
+	white-space: pre;
+}
+div.spacing {
+	padding: 10px 10px 10px 10px;
+}
 
 table.main {
 	width: 100%;

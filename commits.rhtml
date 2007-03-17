@@ -25,11 +25,11 @@ Content-type: text/html; charset=UTF-8
 <th>Committer</th>
 <th>Summary</th>
 </tr>
-<%Wit.commits do |fmt, time, committer, summary|%><tr class="<%=fmt%>">
+<%Wit.commits do |group, repo, commit, parent, fmt, time, committer, summary|%><tr class="<%=fmt%>">
 <td><%=time%></td>
 <td><%=committer%></td>
 <td><%=summary%></td>
-<td><a class="default" href="diff.rhtml?group=<%=%>&repo=<%=%>">diff</a> | <a class="default" href="tree.rhtml?group=<%=%>&repo=<%=%>">tree</a> | <a class="default" href="snapshot.rhtml?group=<%=%>&repo=<%=%>">snapshot</a></td>
+<td><a class="default" href="diff.rhtml?group=<%=group%>&repo=<%=repo%>&head=<%=commit%><%if(parent)%>&parent=<%=parent%><%end%>">diff</a> | <a class="default" href="tree.rhtml?group=<%=%>&repo=<%=%>">tree</a> | <a class="default" href="snapshot.rhtml?group=<%=%>&repo=<%=%>">snapshot</a></td>
 </tr>
 <%end%></table>
 <div class="branches">Branches</div>

@@ -40,7 +40,7 @@ class Wit
 		repos = []
 
 		config[:groups].find { |h| h.has_key?(group) }[group][:repos].each_with_index do |repo_config, i|
-			repo = self.new(group, repo_config.keys.first)
+			repo = new(group, repo_config.keys.first)
 			repos.push(repo)
 			yield(i % 2 == 0 ? 'odd' : 'even', repo) if(block_given?)
 		end
@@ -51,7 +51,7 @@ class Wit
 	def self.repo_info
 		conf = config
 		group, repo, show, start = cgi_params(conf)
-		wit = self.new(group, repo)
+		wit = new(group, repo)
 
 		save_config_if_changed(conf)
 
@@ -80,7 +80,7 @@ class Wit
 
 		save_config_if_changed(conf)
 
-		wit = self.new(group, repo)
+		wit = new(group, repo)
 		[wit.commits(show, start)].flatten.each_with_index do |commit, i|
 			time = commit[:committer_time] || commit[:author_time]
 			time = time ? time.utc.strftime(timefmt) : ''
@@ -89,7 +89,7 @@ class Wit
 			info = time, commit[:author] || commit[:committer], title
 
 			info.map { |c| CGI.escapeHTML(c || '') }
-			yield(i % 2 == 0 ? 'odd' : 'even', *info)
+			yield(group, repo, commit[:hash], commit[:parent], i % 2 == 0 ? 'odd' : 'even', *info)
 		end
 	end
 
@@ -110,11 +110,59 @@ class Wit
 
 		save_config_if_changed(conf)
 
-		commits = self.new(group, repo).commits(show + 1, start)
+		commits = new(group, repo).commits(show + 1, start)
 		last = commits.is_a?(Array) ? commits.pop : commits
 		if(commits.is_a?(Array) && last && commits && last[:hash] != commits.last[:hash])
 			yield(group, repo, last[:hash]) if(block_given?)
 			last[:hash]
+		end
+	end
+
+	def self.diff
+		conf = config
+		params = CGI.new.params
+		group = params['group'].first
+		repo =  params['repo'].first
+		wit = new(group, repo)
+		head = params['head'].first
+		parent = params['parent'].first || [wit.commits(1, head)[:parent]].flatten.first
+
+		ret = wit.diff(head, parent).map do |line|
+			style = 'diff'
+			case(line)
+				when(/^@/)
+					style = 'purple'
+				when(/^\+/)
+					style = 'green'
+				when(/^-/)
+					style = 'red'
+			end
+
+			line = CGI.escapeHTML(line)
+			line.gsub!(/\t/, ' ' * conf[:tab_width] ||= 4)
+			yield(style, line) if(block_given?)
+		end
+
+		save_config_if_changed(conf)
+
+		ret
+	end
+
+	def self.commit_info
+		conf = config
+		params = CGI.new.params
+		group = params['group'].first
+		repo =  params['repo'].first
+		head = params['head'].first
+		timefmt = conf[:commit_time_format] ||= '%Y/%m/%d %H:%M:%S'
+
+		save_config_if_changed(conf)
+
+		Wit.new(group, repo).commits(1, head).sort { |a, b| a.to_s <=> b.to_s }.each do |prop|
+			(key, val) = prop
+			val = val.strftime(timefmt) if(key == :committer_time || key == :author_time)
+			val.sub!('@', ' at ') if(key == :committer_email || key == :author_email)
+			yield(CGI.escapeHTML(key.to_s), CGI.escapeHTML(val.to_s)) if(block_given?)
 		end
 	end
 
@@ -202,6 +250,10 @@ class Wit
 		@git.branch.split("\n").map { |b| b.sub(/\*/, '').lstrip }
 	end
 
+	def diff(head, parent)
+		@git.diff(parent || head, head).split("\n") || []
+	end
+
 	def close
 		save_config
 	end
@@ -225,9 +277,8 @@ class Wit
 
 	def commitdata(ary)
 		commit = { :hash => ary.shift.split.last,
-		           :tree => ary.shift.split.last,
-		           :parent => ary.shift.split.last }
-		commit[:parent] = [commit[:parent]] if(ary.first.match(/^parent/))
+		           :tree => ary.shift.split.last }
+		commit[:parent] = [] if(ary.first.match(/^parent/))
 		commit[:parent].push(ary.shift.split.last) while(ary.first.match(/^parent/))
 
 		if(ary.empty?)
