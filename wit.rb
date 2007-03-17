@@ -25,22 +25,16 @@ class Wit
 	end
 
 	def self.groups
-		groups = []
-
-		config[:groups].each do |group_config|
-			group = group_config.keys.first
-			groups.push(group)
-			yield(group) if(block_given?)
+		config[:groups].each do |group|
+			yield(group[:name]) if(block_given?)
 		end
-
-		groups
 	end
 
 	def self.repos(group)
 		repos = []
 
-		config[:groups].find { |h| h.has_key?(group) }[group][:repos].each_with_index do |repo_config, i|
-			repo = new(group, repo_config.keys.first)
+		config[:groups].find { |h| h[:name] == group }[:repos].each_with_index do |repo, i|
+			repo = new(group, repo[:name])
 			repos.push(repo)
 			yield(i % 2 == 0 ? 'odd' : 'even', repo) if(block_given?)
 		end
@@ -70,7 +64,7 @@ class Wit
 		save_config_if_changed(conf)
 
 		yield(group, repo, branch) if(block_given?)
-		[group, repo]
+		[group, repo, branch]
 	end
 
 	def self.commits
@@ -171,9 +165,7 @@ class Wit
 	def initialize(group, name)
 		@config = YAML.load_file(File.expand_path(CONFIGFILE))
 		@group, @name = group, name
-		@repoconfig = @config[:groups].find do |g|
-			g.has_key?(@group)
-		end[@group][:repos].find { |h| h.has_key?(@name) }[@name]
+		@repoconfig = @config[:groups].find { |g| g[:name] == @group }[:repos].find { |h| h[:name] == @name }
 		@git = Git.new(@config[:git_bin] ||= 'git', @repoconfig[:path])
 	end
 
@@ -318,10 +310,10 @@ class Wit
 	def save_config
 		g, r = 0, 0
 
-		@config[:groups].each_with_index { |grp, i| g = i if(grp.keys.first == @group) }
-		@config[:groups][g][@group][:repos].each_with_index { |repo, i| r = i if(repo.keys.first == @name) }
+		@config[:groups].each_with_index { |grp, i| g = i if(grp[:name] == @group) }
+		@config[:groups][g][:repos].each_with_index { |repo, i| r = i if(repo[:name] == @name) }
 
-		@config[:groups][g][@group][:repos][r][@name] = @repoconfig
+		@config[:groups][g][:repos][r] = @repoconfig
 
 		if(File.writable?(CONFIGFILE) && YAML.load_file(CONFIGFILE) != @config)
 			File.open(CONFIGFILE, 'w') { |f| f.write(@config.to_yaml) }

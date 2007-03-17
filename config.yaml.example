@@ -1,23 +1,18 @@
 ---
-:title: Wit
+:title: Puzzles' Wit
 :git_bin: git
-:tab_width: 4
-:commits_per_page: 50
 :commit_time_format: "%Y/%m/%d %H:%M:%S"
+:commits_per_page: 50
+:tab_width: 4
 :groups:
-- My FooBar:
-    :repos:
-    - Foo:
-        :path: /foo/.git/
-        :description: Implements FooClass.
-        :owner: John Doe
-    - Bar:
-        :path: /bar/.git/
-        :description: Implements BarClass.
-        :owner: Apanap Korvarsson
-- My Baz:
-    :repos:
-    - Baz:
-        :path: /baz/.git/
-        :description: Optional BarClass addon.
-        :owner: Jane Doe
+- :name: FooBar
+  :repos:
+  - :name: Foo
+    :path: ~/git/foo/.git/
+    :owner: You
+    :description: Implements FooClass
+  :repos:
+  - :name: Bar
+    :path: ~/git/bar/.git/
+    :owner: You
+    :description: Implements Barclass
