@@ -1,6 +1,7 @@
 ---
 :title: Wit
 :git_bin: git
+:tab_width: 4
 :commits_per_page: 50
 :commit_time_format: "%Y/%m/%d %H:%M:%S"
 :groups:
