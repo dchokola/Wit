@@ -7,6 +7,6 @@ class Git
 	end
 
 	def method_missing(cmd, *opts)
-		`#{@git_bin} --git-dir='#{@git_dir}' #{cmd.to_s.gsub('_', '-')} #{opts.join(' ')}`
+		`#{@git_bin} --git-dir='#{@git_dir}' #{cmd.to_s.gsub('_', '-')} #{opts.join(' ')} 2>&1`
 	end
 end
