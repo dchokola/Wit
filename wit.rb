@@ -50,7 +50,7 @@ class Wit
 
 	def self.repo_info
 		conf = config
-		group, repo, show, start = cgi_params(conf)
+		group, repo, show, start, branch = cgi_params(conf)
 		wit = new(group, repo)
 
 		save_config_if_changed(conf)
@@ -65,18 +65,18 @@ class Wit
 
 	def self.repo_title
 		conf = config
-		group, repo, show, start = cgi_params(conf)
+		group, repo, show, start, branch = cgi_params(conf)
 
 		save_config_if_changed(conf)
 
-		yield(group, repo) if(block_given?)
+		yield(group, repo, branch) if(block_given?)
 		[group, repo]
 	end
 
 	def self.commits
 		conf = config
 		timefmt = conf[:commit_time_format] ||= '%Y/%m/%d %H:%M:%S'
-		group, repo, show, start = cgi_params(conf)
+		group, repo, show, start, branch = cgi_params(conf)
 
 		save_config_if_changed(conf)
 
@@ -89,24 +89,24 @@ class Wit
 			info = time, commit[:author] || commit[:committer], title
 
 			info.map { |c| CGI.escapeHTML(c || '') }
-			yield(group, repo, commit[:hash], commit[:parent], i % 2 == 0 ? 'odd' : 'even', *info)
+			yield(group, repo, branch, commit[:hash], commit[:parent], i % 2 == 0 ? 'odd' : 'even', *info)
 		end
 	end
 
 	def self.branches
 		conf = config
-		group, repo, show, start = cgi_params(conf)
+		group, repo, show, start, branch = cgi_params(conf)
 
 		save_config_if_changed(conf)
 
-		self.new(group, repo).branches.each_with_index do |branch, i|
+		new(group, repo).branches.each_with_index do |branch, i|
 			yield(i % 2 == 0 ? 'odd' : 'even', group, repo, CGI.escapeHTML(branch))
 		end
 	end
 
 	def self.next_page
 		conf = config
-		group, repo, show, start = cgi_params(conf)
+		group, repo, show, start, branch = cgi_params(conf)
 
 		save_config_if_changed(conf)
 
@@ -272,7 +272,8 @@ class Wit
 		[params['group'].first,
 		 params['repo'].first,
 		 (params['show'].first || conf[:commits_per_page] ||= 50).to_i,
-		 params['start'].first || 'master']
+		 params['start'].first || params['branch'].first || 'master',
+		 params['branch'].first || 'master']
 	end
 
 	def commitdata(ary)
