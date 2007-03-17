@@ -17,8 +17,6 @@ class Wit
 		conf = config
 		conf[:title] ||= 'Wit'
 
-		save_config_if_changed(conf)
-
 		CGI.escapeHTML(conf[:title])
 	end
 
@@ -45,8 +43,6 @@ class Wit
 		group, repo, show, start, branch = cgi_params(conf)
 		wit = new(group, repo)
 
-		save_config_if_changed(conf)
-
 		{ 'Group' => group,
 		  'Name' => repo,
 		  'Description' => wit.repoconfig[:description],
@@ -59,8 +55,6 @@ class Wit
 		conf = config
 		group, repo, show, start, branch = cgi_params(conf)
 
-		save_config_if_changed(conf)
-
 		yield(group, repo, branch) if(block_given?)
 		[group, repo, branch]
 	end
@@ -69,8 +63,6 @@ class Wit
 		conf = config
 		timefmt = conf[:commit_time_format] ||= '%Y/%m/%d %H:%M:%S'
 		group, repo, show, start, branch = cgi_params(conf)
-
-		save_config_if_changed(conf)
 
 		wit = new(group, repo)
 		[wit.commits(show, start)].flatten.each_with_index do |commit, i|
@@ -89,8 +81,6 @@ class Wit
 		conf = config
 		group, repo, show, start, branch = cgi_params(conf)
 
-		save_config_if_changed(conf)
-
 		new(group, repo).branches.each_with_index do |branch, i|
 			yield(i % 2 == 0 ? 'odd' : 'even', group, repo, CGI.escapeHTML(branch))
 		end
@@ -99,8 +89,6 @@ class Wit
 	def self.next_page
 		conf = config
 		group, repo, show, start, branch = cgi_params(conf)
-
-		save_config_if_changed(conf)
 
 		commits = new(group, repo).commits(show + 1, start)
 		last = commits.is_a?(Array) ? commits.pop : commits
@@ -135,8 +123,6 @@ class Wit
 			yield(style, line) if(block_given?)
 		end
 
-		save_config_if_changed(conf)
-
 		ret
 	end
 
@@ -147,8 +133,6 @@ class Wit
 		repo =  params['repo'].first
 		head = params['head'].first
 		timefmt = conf[:commit_time_format] ||= '%Y/%m/%d %H:%M:%S'
-
-		save_config_if_changed(conf)
 
 		Wit.new(group, repo).commits(1, head).sort { |a, b| a.to_s <=> b.to_s }.each do |prop|
 			(key, val) = prop
@@ -249,12 +233,6 @@ class Wit
 	end
 
 	private
-
-	def self.save_config_if_changed(conf)
-		if(File.writable?(CONFIGFILE) && YAML.load_file(CONFIGFILE) != conf)
-			File.open(CONFIGFILE, 'w') { |f| f.write(conf.to_yaml) }
-		end
-	end
 
 	def self.cgi_params(conf)
 		params = CGI.new.params
