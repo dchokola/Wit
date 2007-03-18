@@ -127,10 +127,10 @@ class Wit
 		tmp = cominfo[:committer_email].sub('@', ' at ')
 		time = last_update(cominfo[:committer_time])
 		info.push(['committer', "#{cominfo[:committer]} <#{tmp}> (#{time})"])
-		tmp = "#{cominfo[:title]}\n#{cominfo[:description]}".chomp.sub("\n", '<br/>')
+		tmp = "#{cominfo[:title]}\n#{cominfo[:description]}".chomp
 		info.push(['commit message', tmp])
 
-		info.each { |(key, val)| yield(CGI.escapeHTML(key), CGI.escapeHTML(val)) }
+		info.each { |(key, val)| yield(CGI.escapeHTML(key), CGI.escapeHTML(val).gsub("\n", '<br/>')) }
 	end
 
 	def repo_info(&block)
