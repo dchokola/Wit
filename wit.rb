@@ -77,7 +77,7 @@ class Wit
 			info = [time, commit[:author] || commit[:committer], title,
 			        commit[:hash], (commit[:parent] || []).first]
 
-			info.map { |c| CGI.escapeHTML(c || '') }
+			info = info.map { |c| CGI.escapeHTML(c || '') }
 			yield(i % 2 == 0 ? 'odd' : 'even', *info)
 		end
 	end
