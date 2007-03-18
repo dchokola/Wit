@@ -43,4 +43,4 @@ w = Wit.new%>
 <a class="opml" href="opml.rhtml">OPML</a><%w.next_page do |head|%>
 <a href="commits.rhtml?group=<%=w.group%>&name=<%=w.name%>&head=<%=head%>">Next</a><%end%>
 </div>
-</html>
+</html><%w.close%>
