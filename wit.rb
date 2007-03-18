@@ -7,7 +7,15 @@ CONFIGFILE = 'config.yaml'
 
 class Wit
 	def initialize
-		@config = YAML.load_file(CONFIGFILE)
+		begin
+			@config = YAML.load_file(CONFIGFILE)
+		rescue Errno::ENOENT
+			begin
+				File.open(CONFIGFILE, 'w') {}
+			rescue Errno::EACCES
+			end
+			@config = {}
+		end
 		params = CGI.new.params
 
 		# some default values
@@ -19,6 +27,7 @@ class Wit
 		@config[:description_length] ||= 30
 		@config[:comment_length] ||= 30
 		@config[:commit_length] ||= 50
+		try_find_repos
 
 		# some attributes
 		@title = @config[:title]
@@ -145,6 +154,22 @@ class Wit
 		str.length > len ? str[0..len] + '...' : str
 	end
 
+	def try_find_repos
+		return if(@config[:groups].is_a?(Array))
+
+		@config[:groups] = [{}]
+		Dir.entries('.').each do |ent|
+			next unless(File.directory?(ent) && !Git.new('git', ent).branch.match(/^fatal/))
+
+			repo = { :name => ent,
+			         :path => File.expand_path(ent),
+			         :description => ent + ' automatically located by Wit' }
+			@config[:groups].first[:name] ||= 'Autolocated by Wit'
+			@config[:groups].first[:repos] ||=[]
+			@config[:groups].first[:repos].push(repo)
+		end
+	end
+
 	def last_update(time)
 		difference = (Time.now - time).to_i
 
@@ -175,14 +200,12 @@ class Wit
 		g, r = nil, nil
 
 		@config[:groups].each_with_index { |grp, i| g = i if(grp[:name] == @group) }
-		return unless(g)
-		@config[:groups][g][:repos].each_with_index { |repo, i| r = i if(repo[:name] == @name) }
-		return unless(r)
+		@config[:groups][g][:repos].each_with_index { |repo, i| r = i if(repo[:name] == @name) } if(g)
 
-		@config[:groups][g][:repos][r] = @repoconfig
+		@config[:groups][g][:repos][r] = @repoconfig if(r)
 
-		if(File.writable?(CONFIGFILE) && YAML.load_file(CONFIGFILE) != CONFIG)
-			File.open(CONFIGFILE, 'w') { |f| f.write(CONFIG.to_yaml) }
+		if(File.writable?(CONFIGFILE) && YAML.load_file(CONFIGFILE) != @config)
+			File.open(CONFIGFILE, 'w') { |f| f.write(@config.to_yaml) }
 		end
 	end
 end
