@@ -4,107 +4,94 @@ require 'yaml'
 require 'git'
 
 CONFIGFILE = 'config.yaml'
-MAX_DESC_LENGTH = 33
-MAX_SHORT_CMT_LENGTH = 33
-MAX_COMMIT_TITLE_LENGTH = 83
 
 class Wit
-	CONFIG = YAML.load_file(CONFIGFILE)
+	def initialize
+		@config = YAML.load_file(CONFIGFILE)
+		params = CGI.new.params
 
-	# some default values
-	CONFIG[:title] ||= "Puzzles' Wit"
-	CONFIG[:commit_time_format] ||= '%Y/%m/%d %H:%M:%S'
-	CONFIG[:git_bin] ||= 'git'
-	CONFIG[:tab_width] ||= 4
-	CONFIG[:commits_per_page] ||= 50
+		# some default values
+		@config[:title] ||= 'Wit'
+		@config[:commit_time_format] ||= '%Y/%m/%d %H:%M:%S'
+		@config[:git_bin] ||= 'git'
+		@config[:tab_width] ||= 4
+		@config[:commits_per_page] ||= 50
+		@config[:description_length] ||= 30
+		@config[:comment_length] ||= 30
+		@config[:commit_length] ||= 50
 
-	def self.title
-		CGI.escapeHTML(CONFIG[:title])
-	end
+		# some attributes
+		@title = @config[:title]
+		@group = params['group'].first
+		@name = params['name'].first
+		@limit = params['limit'].first || @config[:commits_per_page]
+		@branch = params['branch'].first || 'master'
+		@head = params['head'].first || @branch
+		@parent = params['parent'].first
 
-	def self.groups
-		CONFIG[:groups].each do |group|
-			yield(group[:name]) if(block_given?)
+		attrs = ['title', 'group', 'name', 'limit', 'head', 'parent', 'branch']
+		attrs.each do |name|
+			eval("def #{name}\n@#{name} ? CGI.escapeHTML(@#{name}) : @#{name}\nend")
+		end
+
+		if(@group && @name)
+			repos = @config[:groups].find { |grp| grp[:name] == @group }[:repos]
+			@repoconfig = repos.find { |repo| repo[:name] == @name }
+			@repo = Repo.new(@config[:git_bin], @repoconfig[:path])
 		end
 	end
 
-	def self.repos(group)
-		repos = []
-
-		CONFIG[:groups].find { |h| h[:name] == group }[:repos].each_with_index do |repo, i|
-			repo = new(group, repo[:name])
-			repos.push(repo)
-			yield(i % 2 == 0 ? 'odd' : 'even', repo) if(block_given?)
-		end
-
-		repos
+	def groups(&block)
+		@config[:groups].each { |group| yield(group[:name]) }
 	end
 
-	def self.repo_info
-		group, repo, show, start, branch = cgi_params
-		wit = new(group, repo)
-
-		{ 'Group' => group,
-		  'Name' => repo,
-		  'Description' => wit.repoconfig[:description],
-		  'Last modified' => wit.last_update }.each do |key, val|
-			yield(CGI.escapeHTML(key.to_s), CGI.escapeHTML(val)) if(block_given?)
+	def repos(group, &block)
+		@config[:groups].find { |h| h[:name] == group }[:repos].each_with_index do |repinfo, i|
+			repo = Repo.new(@config[:git_bin], repinfo[:path])
+			info = repinfo.values_at(:name, :description, :owner)
+			lastcom = repo.commits.first
+			info.push(trim(lastcom[:title], @config[:commit_length]))
+			info.push(last_update(lastcom[:committer_time] || lastcom[:author_time]))
+			yield(i % 2 == 0 ? 'odd' : 'even', *info)
 		end
 	end
 
-	def self.repo_title
-		group, repo, show, start, branch = cgi_params
+	def commits(&block)
+		timefmt = @config[:commit_time_format]
+		title_len = @config[:commit_length]
 
-		yield(group, repo, branch) if(block_given?)
-		[group, repo, branch]
-	end
-
-	def self.commits
-		timefmt = CONFIG[:commit_time_format]
-		group, repo, show, start, branch = cgi_params
-
-		wit = new(group, repo)
-		[wit.commits(show, start)].flatten.each_with_index do |commit, i|
+		@repo.commits(@limit, @head).each_with_index do |commit, i|
 			time = commit[:committer_time] || commit[:author_time]
-			time = time ? time.utc.strftime(timefmt) : ''
+			time = time.utc.strftime(timefmt) if(time)
 			title = commit[:title]
-			title = title[0..MAX_COMMIT_TITLE_LENGTH - 3] + '...' if(title && title.length > MAX_COMMIT_TITLE_LENGTH)
-			info = time, commit[:author] || commit[:committer], title
+			title = title[0..title_len] + '...' if(title && title.length > title_len)
+			info = [time, commit[:author] || commit[:committer], title,
+			        commit[:hash], (commit[:parent] || []).first]
 
 			info.map { |c| CGI.escapeHTML(c || '') }
-			yield(group, repo, branch, commit[:hash], commit[:parent], i % 2 == 0 ? 'odd' : 'even', *info)
+			yield(i % 2 == 0 ? 'odd' : 'even', *info)
 		end
 	end
 
-	def self.branches
-		group, repo, show, start, branch = cgi_params
-
-		new(group, repo).branches.each_with_index do |branch, i|
-			yield(i % 2 == 0 ? 'odd' : 'even', group, repo, CGI.escapeHTML(branch))
+	def branches
+		@repo.branches.each_with_index do |branch, i|
+			yield(i % 2 == 0 ? 'odd' : 'even', CGI.escapeHTML(branch))
 		end
 	end
 
-	def self.next_page
-		group, repo, show, start, branch = cgi_params
+	def next_page(&block)
+		commits = @repo.commits(@limit + 1, @head)
+		last = commits ? commits.pop : nil
 
-		commits = new(group, repo).commits(show + 1, start)
-		last = commits.is_a?(Array) ? commits.pop : commits
-		if(commits.is_a?(Array) && last && commits && last[:hash] != commits.last[:hash])
-			yield(group, repo, last[:hash]) if(block_given?)
-			last[:hash]
-		end
+		yield(last[:hash]) if(last && commits && last[:hash] != commits.last[:hash])
 	end
 
-	def self.diff
-		params = CGI.new.params
-		group = params['group'].first
-		repo =  params['repo'].first
-		wit = new(group, repo)
-		head = params['head'].first
-		parent = params['parent'].first || [wit.commits(1, head)[:parent]].flatten.first
+	def diff(&block)
+		parent = @parent || @repo.commits(1, @head).first[:parent].first
 
-		ret = wit.diff(head, parent).map do |line|
+		@repo.diff(head, parent).map do |line|
 			style = 'diff'
+
 			case(line)
 				when(/^@/)
 					style = 'purple'
@@ -114,53 +101,52 @@ class Wit
 					style = 'red'
 			end
 
-			line = CGI.escapeHTML(line)
-			line.gsub!(/\t/, ' ' * CONFIG[:tab_width])
-			yield(style, line) if(block_given?)
-		end
-
-		ret
-	end
-
-	def self.commit_info
-		params = CGI.new.params
-		group = params['group'].first
-		repo =  params['repo'].first
-		head = params['head'].first
-		timefmt = CONFIG[:commit_time_format]
-
-		Wit.new(group, repo).commits(1, head).sort { |a, b| a.to_s <=> b.to_s }.each do |prop|
-			(key, val) = prop
-			val = val.strftime(timefmt) if(key == :committer_time || key == :author_time)
-			val.sub!('@', ' at ') if(key == :committer_email || key == :author_email)
-			yield(CGI.escapeHTML(key.to_s), CGI.escapeHTML(val.to_s)) if(block_given?)
+			line = CGI.escapeHTML(line.gsub(/\t/, ' ' * @config[:tab_width]))
+			yield(style, line)
 		end
 	end
 
-	attr_reader(:repoconfig, :group, :name)
+	def commit_info(&block)
+		cominfo = @repo.commits(1, @head).first
+		info = []
+		tmp = nil
+		time =
 
-	def initialize(group, name)
-		@group, @name = group, name
-		@repoconfig = CONFIG[:groups].find { |g| g[:name] == @group }[:repos].find { |h| h[:name] == @name }
-		@git = Git.new(CONFIG[:git_bin], @repoconfig[:path])
+		tmp = cominfo[:author_email].sub('@', ' at ')
+		time = last_update(cominfo[:author_time])
+		info.push(['author', "#{cominfo[:author]} <#{tmp}> (#{time})"])
+		tmp = cominfo[:committer_email].sub('@', ' at ')
+		time = last_update(cominfo[:committer_time])
+		info.push(['committer', "#{cominfo[:committer]} <#{tmp}> (#{time})"])
+		tmp = "#{cominfo[:title]}\n#{cominfo[:description]}".chomp.sub("\n", '<br/>')
+		info.push(['commit message', tmp])
+
+		info.each { |(key, val)| yield(CGI.escapeHTML(key), CGI.escapeHTML(val)) }
 	end
 
-	def description
-		desc = CGI.escapeHTML(@repoconfig[:description] ||= '')
-		desc.length > MAX_DESC_LENGTH ? desc[0..MAX_DESC_LENGTH - 3] + '...' : desc
+	def repo_info(&block)
+		commit = @repo.commits.first
+		time = commit[:author_time] || commit[:committer_time]
+		info = [['Group', @group],
+		        ['Name', @name],
+		        ['Description', @repoconfig[:description]],
+		        ['Last modified', last_update(time)]]
+
+		info.each { |(key, val)| yield(CGI.escapeHTML(key), CGI.escapeHTML(val)) }
 	end
 
-	def last_commit
-		com = CGI.escapeHTML(commits[:title])
-		com.length > MAX_SHORT_CMT_LENGTH ? com[0..MAX_SHORT_CMT_LENGTH - 3] + '...' : com
+	def close
+		save_config
 	end
 
-	def owner
-		CGI.escapeHTML(@repoconfig[:owner] ||= repo_config[:'user.name'])
+	private
+
+	def trim(str, len)
+		str.length > len ? str[0..len] + '...' : str
 	end
 
-	def last_update
-		difference = (Time.now - commits[:committer_time]).to_i
+	def last_update(time)
+		difference = (Time.now - time).to_i
 
 		if(difference < div = 60)
 			'right now'
@@ -185,16 +171,25 @@ class Wit
 		end
 	end
 
-	def repo_config
-		config = {}
+	def save_config
+		g, r = nil, nil
 
-		@git.repo_config('--list').split("\n").each do |prop|
-			key, value = prop.split('=')
-			config[key.to_sym] = value
-			yield(CGI.escapeHTML(key), CGI.escapeHTML(value)) if(block_given?)
+		@config[:groups].each_with_index { |grp, i| g = i if(grp[:name] == @group) }
+		return unless(g)
+		@config[:groups][g][:repos].each_with_index { |repo, i| r = i if(repo[:name] == @name) }
+		return unless(r)
+
+		@config[:groups][g][:repos][r] = @repoconfig
+
+		if(File.writable?(CONFIGFILE) && YAML.load_file(CONFIGFILE) != CONFIG)
+			File.open(CONFIGFILE, 'w') { |f| f.write(CONFIG.to_yaml) }
 		end
+	end
+end
 
-		config
+class Repo
+	def initialize(git_bin, path)
+		@git = Git.new(git_bin, path)
 	end
 
 	def commits(num = 1, start = 'master')
@@ -207,11 +202,9 @@ class Wit
 		end
 		ary = ary.map { |s| s.strip }.delete_if { |a| a.nil? || a.empty? }
 
-		while(!ary.empty?)
-			commits.push(commitdata(ary))
-		end
+		commits.push(commitdata(ary)) while(!ary.empty?)
 
-		commits.length == 1 ? commits.first : commits
+		commits
 	end
 
 	def branches
@@ -222,21 +215,7 @@ class Wit
 		@git.diff(parent || head, head).split("\n") || []
 	end
 
-	def close
-		save_config
-	end
-
 	private
-
-	def self.cgi_params
-		params = CGI.new.params
-
-		[params['group'].first,
-		 params['repo'].first,
-		 (params['show'].first || CONFIG[:commits_per_page]).to_i,
-		 params['start'].first || params['branch'].first || 'master',
-		 params['branch'].first || 'master']
-	end
 
 	def commitdata(ary)
 		commit = { :hash => ary.shift.split.last,
@@ -244,49 +223,36 @@ class Wit
 		commit[:parent] = [] if(ary.first.match(/^parent/))
 		commit[:parent].push(ary.shift.split.last) while(ary.first.match(/^parent/))
 
-		if(ary.empty?)
-			author = nil
-		else
-			author = ary.first.match(/^author\s+(.+?)\s+<(.+?)>\s+(\d+)\s*(.*)$/)
-			author = ary.first.match(/^author\s+()<(.+?)>\s+(\d+)\s*(.*)$/) unless(author)
-		end
-		if(author)
-			ary.shift
-			commit[:author], commit[:author_email] = author[1..2]
-			commit[:author_time] = Time.at(author[3].to_i)
-		end
-
-		if(ary.empty?)
-			committer = nil
-		else
-			committer = ary.first.match(/^committer\s+(.+?)\s+<(.+?)>\s+(\d+)\s*(.*)$/)
-			committer = ary.first.match(/^committer\s+()<(.+?)>\s+(\d+)\s*(.*)$/) unless(committer)
-		end
-		if(committer)
-			ary.shift
-			commit[:committer], commit[:committer_email] = committer[1..2]
-			commit[:committer_time] = Time.at(committer[3].to_i)
-		end
-
-		commit[:title] = ary.shift unless(ary.empty? || ary.first.match(/^commit/))
-		while(!ary.empty? && !ary.first.match(/^commit/))
-			commit[:description] = [commit[:description], ary.shift].join(' ')
-		end
-		commit[:description].lstrip if(commit[:description])
+		writer('author', ary, commit)
+		writer('committer', ary, commit)
+		description(ary, commit)
 
 		commit
 	end
 
-	def save_config
-		g, r = 0, 0
+	def writer(name, ary, commit)
+		ret = nil
 
-		CONFIG[:groups].each_with_index { |grp, i| g = i if(grp[:name] == @group) }
-		CONFIG[:groups][g][:repos].each_with_index { |repo, i| r = i if(repo[:name] == @name) }
-
-		CONFIG[:groups][g][:repos][r] = @repoconfig
-
-		if(File.writable?(CONFIGFILE) && YAML.load_file(CONFIGFILE) != CONFIG)
-			File.open(CONFIGFILE, 'w') { |f| f.write(CONFIG.to_yaml) }
+		if(ary.empty?)
+			writer = nil
+		else
+			writer = ary.first.match(/^#{name}\s+(.+?)\s+<(.+?)>\s+(\d+)\s*(.*)$/)
+			writer = ary.first.match(/^#{name}\s+()<(.+?)>\s+(\d+)\s*(.*)$/) unless(writer)
 		end
+
+		if(writer)
+			ary.shift
+			commit[name.to_sym], commit[(name + '_email').to_sym] = writer[1..2]
+			commit[(name + '_time').to_sym] = Time.at(writer[3].to_i)
+		end
+	end
+
+	def description(ary, commit)
+		commit[:title] = ary.shift unless(ary.empty? || ary.first.match(/^commit/))
+
+		while(!ary.empty? && !ary.first.match(/^commit/))
+			commit[:description] = [commit[:description], ary.shift].join(' ')
+		end
+		commit[:description].lstrip if(commit[:description])
 	end
 end

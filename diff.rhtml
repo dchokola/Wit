@@ -1,25 +1,26 @@
 Content-type: text/html; charset=UTF-8
-<%require 'wit'%>
+<%require 'wit'
+w = Wit.new%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <head>
 <meta name="robots" content="index, nofollow"/>
-<link rel="stylesheet" type="text/css" href="style/gitweb.css"/><%Wit.repo_title do |group, repo, branch|%>
-<title><%=group%>::<%=repo%>/<%=branch%></title><%end%>
+<link rel="stylesheet" type="text/css" href="style/gitweb.css"/>
+<title></title>
 </head>
 <body>
 <div class="header">
 <a href="http://www.kernel.org/pub/software/scm/git/docs/" title="git documentation">
 <img src="images/git.png" alt="git" class="logo"/>
-</a><%Wit.repo_title do |group, repo, branch|%>
-<a href="."><%=group%>::<%=repo%>/<%=branch%></a><%end%>
+</a>
+<a href="."><%=w.group%>::<%=w.name%>/<%=w.branch%></a>
 </div>
 <div class="info">
-<table cellspacing="0" class="info"><%Wit.commit_info do |key, val|%>
+<table cellspacing="0" class="info"><%w.commit_info do |key, val|%>
 <tr><td class="info"><%=key%>:</td><td class="info"><%=val%></td></tr><%end%>
 </table>
 </div>
-<div class="spacing"><%Wit.diff do |style, line|%>
+<div class="spacing"><%w.diff do |style, line|%>
 <div class="<%=style%>"><%=line%></div><%end%>
 </div>
 <div class="footer">

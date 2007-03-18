@@ -1,45 +1,46 @@
 Content-type: text/html; charset=UTF-8
-<%require 'wit'%>
+<%require 'wit'
+w = Wit.new%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <head>
 <meta name="robots" content="index, nofollow"/>
-<link rel="stylesheet" type="text/css" href="style/gitweb.css"/><%Wit.repo_title do |group, repo, branch|%>
-<title><%=group%>::<%=repo%>/<%=branch%></title><%end%>
+<link rel="stylesheet" type="text/css" href="style/gitweb.css"/>
+<title><%=w.group%>::<%=w.name%>/<%=w.branch%></title>
 </head>
 <body>
 <div class="header">
 <a href="http://www.kernel.org/pub/software/scm/git/docs/" title="git documentation">
 <img src="images/git.png" alt="git" class="logo"/>
-</a><%Wit.repo_title do |group, repo, branch|%>
-<a href="."><%=group%>::<%=repo%>/<%=branch%></a><%end%>
+</a>
+<a href="."><%=w.group%>::<%=w.name%>/<%=w.branch%></a>
 </div>
 <div class="info">
-<table cellspacing="0" class="info"><%Wit.repo_info do |key, val|%>
+<table cellspacing="0" class="info"><%w.repo_info do |key, val|%>
 <tr><td class="info"><%=key%>:</td><td class="info"><%=val%></td></tr><%end%>
 </table>
 </div>
 <table cellspacing="0" class="main">
 <tr>
 <th>Commit Time</th>
-<th>Committer</th>
+<th>Author</th>
 <th>Summary</th>
 </tr>
-<%Wit.commits do |group, repo, branch, commit, parent, fmt, time, committer, summary|%><tr class="<%=fmt%>">
+<%w.commits do |fmt, time, author, summary, head, parent|%><tr class="<%=fmt%>">
 <td><%=time%></td>
-<td><%=committer%></td>
+<td><%=author%></td>
 <td><%=summary%></td>
-<td><a class="default" href="diff.rhtml?group=<%=group%>&repo=<%=repo%>&head=<%=commit%><%if(parent)%>&parent=<%=parent%><%end%>&branch=<%=branch%>">diff</a> | <a class="default" href="tree.rhtml?group=<%=%>&repo=<%=%>">tree</a> | <a class="default" href="snapshot.rhtml?group=<%=%>&repo=<%=%>">snapshot</a></td>
+<td><a class="default" href="diff.rhtml?group=<%=w.group%>&name=<%=w.name%>&branch=<%=w.branch%>&head=<%=head%><%if(parent)%>&parent=<%=parent%><%end%>">diff</a> | <a class="default" href="tree.rhtml?group=<%=w.group%>&name=<%=w.name%>&head=<%=w.head%>">tree</a> | <a class="default" href="snapshot.rhtml?group=<%=w.group%>&name=<%=w.name%>">snapshot</a></td>
 </tr>
 <%end%></table>
 <div class="branches">Branches</div>
-<table cellspacing="0" class="branches"><%Wit.branches do |fmt, group, repo, branch|%>
+<table cellspacing="0" class="branches"><%w.branches do |fmt, branch|%>
 <tr class="<%=fmt%>"><td class="branch">
-<a href="commits.rhtml?group=<%=group%>&repo=<%=repo%>&branch=<%=branch%>"><%=branch%></a>
+<a href="commits.rhtml?group=<%=w.group%>&name=<%=w.name%>&branch=<%=branch%>"><%=branch%></a>
 </td></tr><%end%>
 </table>
 <div class="footer">
-<a class="opml" href="opml.rhtml">OPML</a><%Wit.next_page do |group, repo, commit|%>
-<a href="commits.rhtml?group=<%=group%>&repo=<%=repo%>&start=<%=commit%>">Next</a><%end%>
+<a class="opml" href="opml.rhtml">OPML</a><%w.next_page do |head|%>
+<a href="commits.rhtml?group=<%=w.group%>&name=<%=w.name%>&head=<%=head%>">Next</a><%end%>
 </div>
 </html>

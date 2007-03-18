@@ -1,18 +1,19 @@
 Content-type: text/html; charset=UTF-8
-<%require 'wit'%>
+<%require 'wit'
+w = Wit.new%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <head>
 <meta name="robots" content="index, nofollow"/>
 <link rel="stylesheet" type="text/css" href="style/gitweb.css"/>
-<title><%=Wit.title%></title>
+<title><%=w.title%></title>
 </head>
 <body>
 <div class="header">
 <a href="http://www.kernel.org/pub/software/scm/git/docs/" title="git documentation">
 <img src="images/git.png" alt="git" class="logo"/>
 </a>
-<a href="."><%=Wit.title%></a>
+<a href="."><%=w.title%></a>
 </div>
 <table cellspacing="0" class="main">
 <tr>
@@ -21,20 +22,19 @@ Content-type: text/html; charset=UTF-8
 <th>Last Commit</th>
 <th>Owner</th>
 <th>Updated</th>
-</tr>
-<%Wit.groups do |group|%><tr><td class="group" colspan="6"><%=group%></td></tr>
-<%Wit.repos(group) do |fmt, repo|%><tr class="<%=fmt%>">
-<td><%=repo.name%></td>
-<td><%=repo.description%></td>
-<td><%=repo.last_commit%></td>
-<td><%=repo.owner%></td>
-<td><%=repo.last_update%></td>
-<td><a class="default" href="commits.rhtml?group=<%=group%>&repo=<%=repo.name%>">commits</a> | <a class="default" href="tree.rhtml?group=<%=group%>&repo=<%=repo.name%>">tree</a> | <a class="default" href="snapshot.rhtml?group=<%=group%>&repo=<%=repo.name%>">snapshot</a></td>
-</tr>
-<%repo.close
-end%></tr>
-<%end%></table>
+</tr><%w.groups do |group|%>
+<tr><td class="group" colspan="6"><%=group%></td></tr>
+<%w.repos(group) do |fmt, name, desc, owner, head, updated|%><tr class="<%=fmt%>">
+<td><%=name%></td>
+<td><%=desc%></td>
+<td><%=head%></td>
+<td><%=owner%></td>
+<td><%=updated%></td>
+<td><a class="default" href="commits.rhtml?group=<%=group%>&name=<%=name%>">commits</a> | <a class="default" href="tree.rhtml?group=<%=group%>&name=<%=name%>">tree</a> | <a class="default" href="snapshot.rhtml?group=<%=group%>&name=<%=name%>">snapshot</a></td>
+</tr><%end%>
+</tr><%end%>
+</table>
 <div class="footer">
 <a class="opml" href="opml.rhtml">OPML</a>
 </div>
-</html>
+</html><%w.close%>
