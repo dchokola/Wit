@@ -120,6 +120,9 @@ table.main {
 	width: 100%;
 	padding: 10px 10px 10px 10px;
 }
+table.main {
+	padding: 10px 10px 10px 10px;
+}
 table.info {
 	padding: 10px 10px 10px 10px;
 }
@@ -130,7 +133,7 @@ table.branches {
 th {
 	text-align: left;
 	vertical-align: center;
-	padding: 0 0 0 0;
+	padding: 0 8px 0 0;
 	font-size: 11pt;
 }
 

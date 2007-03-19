@@ -35,10 +35,11 @@ class Wit
 		@name = params['name'].first
 		@limit = params['limit'].first || @config[:commits_per_page]
 		@branch = params['branch'].first || 'master'
+		@tree = File.join(params['tree'].first || '.', File::SEPARATOR)
 		@head = params['head'].first || @branch
 		@parent = params['parent'].first
 
-		attrs = ['title', 'group', 'name', 'limit', 'head', 'parent', 'branch']
+		attrs = ['title', 'group', 'name', 'limit', 'branch', 'tree', 'head', 'parent']
 		attrs.each do |name|
 			eval("def #{name}\n@#{name} ? CGI.escapeHTML(@#{name}) : @#{name}\nend")
 		end
@@ -112,6 +113,14 @@ class Wit
 
 			line = CGI.escapeHTML(line.gsub(/\t/, ' ' * @config[:tab_width]))
 			yield(style, line)
+		end
+	end
+
+	def ls_tree(&block)
+		@repo.tree(@head, @tree).each_with_index do |object, i|
+			info = [object[:type], object[:mode], object[:hash], object[:name]]
+			info = info.map { |c| CGI.escapeHTML(c || '') }
+			yield(i % 2 == 0 ? 'odd' : 'even', *info)
 		end
 	end
 
@@ -236,6 +245,19 @@ class Repo
 
 	def diff(head, parent)
 		@git.diff(parent || head, head).split("\n") || []
+	end
+
+	def tree(head, tree)
+		@git.ls_tree(head, tree).split("\n").map do |obj|
+			# we can't just split here since the filename could have spaces
+			ary = obj.match(/^(\d+)\s+(\w+)\s+(.*?)\s+(.*)$/).to_a
+			ary.shift
+
+			{ :mode => ary.shift,
+			  :type => ary.shift,
+			  :hash => ary.shift,
+			  :name => ary.shift }
+		end
 	end
 
 	private
