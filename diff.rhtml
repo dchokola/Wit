@@ -6,14 +6,14 @@ w = Wit.new%>
 <head>
 <meta name="robots" content="index, nofollow"/>
 <link rel="stylesheet" type="text/css" href="style/gitweb.css"/>
-<title><%=w.group%>::<%=w.name%>/<%=w.branch%></title>
+<title><%=w.group%>::<%=w.name%>.<%=w.branch%></title>
 </head>
 <body>
 <div class="header">
 <a href="http://www.kernel.org/pub/software/scm/git/docs/" title="git documentation">
 <img src="images/git.png" alt="git" class="logo"/>
 </a>
-<a href="."><%=w.group%>::<%=w.name%>/<%=w.branch%></a>
+<a href="."><%=w.group%>::<%=w.name%>.<%=w.branch%></a>
 </div>
 <div class="info">
 <table cellspacing="0" class="info"><%w.commit_info do |key, val|%>
