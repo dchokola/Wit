@@ -30,7 +30,7 @@ w = Wit.new%>
 <td><%=time%></td>
 <td><%=author%></td>
 <td><%=summary%></td>
-<td><a class="default" href="diff.rhtml?group=<%=w.group%>&name=<%=w.name%>&branch=<%=w.branch%>&head=<%=head%><%if(parent)%>&parent=<%=parent%><%end%>">diff</a> | <a class="default" href="tree.rhtml?group=<%=w.group%>&name=<%=w.name%>&head=<%=w.head%>&branch=<%=w.branch%>">tree</a> | <a class="default" href="snapshot.rhtml?group=<%=w.group%>&name=<%=w.name%>">snapshot</a></td>
+<td><a class="default" href="diff.rhtml?group=<%=w.group%>&name=<%=w.name%>&branch=<%=w.branch%>&head=<%=head%><%if(parent)%>&parent=<%=parent%><%end%>">diff</a> | <a class="default" href="tree.rhtml?group=<%=w.group%>&name=<%=w.name%>&head=<%=head%>&branch=<%=w.branch%>">tree</a> | <a class="default" href="snapshot.rhtml?group=<%=w.group%>&name=<%=w.name%>">snapshot</a></td>
 </tr>
 <%end%></table>
 <div class="branches">Branches</div>
