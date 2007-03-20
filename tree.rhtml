@@ -40,7 +40,6 @@ w = Wit.new%>
 </td></tr><%end%>
 </table>
 <div class="footer">
-<a class="opml" href="opml.rhtml">OPML</a><%w.next_page do |head|%>
-<a href="commits.rhtml?group=<%=w.group%>&name=<%=w.name%>&head=<%=head%>">Next</a><%end%>
+<a class="opml" href="opml.rhtml">OPML</a>
 </div>
 </html><%w.close%>
