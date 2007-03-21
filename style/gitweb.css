@@ -67,7 +67,7 @@ div.header {
 	padding: 10px;
 	font-size: 16pt;
 	font-weight: bold;
-	vertical-align: center;
+	vertical-align: middle;
 	background-color: #D9D8D1
 }
 
@@ -79,14 +79,14 @@ div.info {
 div.branches {
 	height: 18px;
 	padding: 5px 0 5px 10px;
-	vertical-align: center;
+	vertical-align: middle;
 	background-color: #D9D8D1;
 	font-weight: bold;
 }
 div.footer {
 	height: 18px;
 	padding: 5px;
-	vertical-align: center;
+	vertical-align: middle;
 	background-color: #D9D8D1
 }
 div.purple {
@@ -132,14 +132,14 @@ table.branches {
 
 th {
 	text-align: left;
-	vertical-align: center;
+	vertical-align: middle;
 	padding: 0 8px 0 0;
 	font-size: 11pt;
 }
 
 td {
 	text-align: left;
-	vertical-align: center;
+	vertical-align: middle;
 	padding: 2px 8px 2px 0;
 	font-size: 9pt;
 }
@@ -152,7 +152,7 @@ td.info {
 }
 td.branch {
 	text-align: left;
-	vertical-align: center;
+	vertical-align: middle;
 	padding: 2px 4px;
 	font-size: 9pt;
 	font-weight: bold;
@@ -166,7 +166,7 @@ td.group {
 }
 td.num {
 	text-align: right;
-	vertical-align: center;
+	vertical-align: middle;
 	padding: 0 8px 0 0;
 	font-size: 9pt;
 	border-right: solid;
@@ -175,7 +175,7 @@ td.num {
 }
 td.pre {
 	text-align: left;
-	vertical-align: center;
+	vertical-align: middle;
 	padding: 0 8px 0 8px;
 	font-size: 9pt;
 	white-space: pre;
