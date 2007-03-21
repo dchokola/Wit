@@ -6,14 +6,14 @@ w = Wit.new%>
 <head>
 <meta name="robots" content="index, nofollow"/>
 <link rel="stylesheet" type="text/css" href="style/gitweb.css"/>
-<title><%=w.group%>::<%=w.name%>.<%=w.branch%>('<%=w.tree%>')</title>
+<title><%=w.group%>::<%=w.name%>.<%=w.branch%>('<%=w.obj%>')</title>
 </head>
 <body>
 <div class="header">
 <a href="http://www.kernel.org/pub/software/scm/git/docs/" title="git documentation">
 <img src="images/git.png" alt="git" class="logo"/>
 </a>
-<a href="."><%=w.group%>::<%=w.name%>.<%=w.branch%>('<%=w.tree%>')</a>
+<a href="."><%=w.group%>::<%=w.name%>.<%=w.branch%>('<%=w.obj%>')</a>
 </div>
 <div class="info">
 <table cellspacing="0" class="info"><%w.repo_info do |key, val|%>
@@ -28,8 +28,8 @@ w = Wit.new%>
 </tr>
 <%w.ls_tree do |fmt, type, mode, hash, name|%><tr class="<%=fmt%>">
 <td><%=mode%></td>
-<td><%if(type == 'blob')%><a class="default" href="blob.rhtml?group=<%=w.group%>&name=<%=w.name%>&branch=<%=w.branch%>&head=<%=w.head%>&obj=<%=hash%>"><%=name%></a><%else%><a class="default" href="tree.rhtml?group=<%=w.group%>&name=<%=w.name%>&branch=<%=w.branch%>&head=<%=w.head%>&tree=<%=name%>"><%=name%></a><%end%></td>
-<td><%if(type == 'blob')%><a class="default" href="blob.rhtml?group=<%=w.group%>&name=<%=w.name%>&branch=<%=w.branch%>&head=<%=w.head%>&obj=<%=hash%>">blob</a><%else%><a class="default" href="tree.rhtml?group=<%=w.group%>&name=<%=w.name%>&branch=<%=w.branch%>&head=<%=w.head%>&tree=<%=name%>">tree</a><%end%>
+<td><a class="default" href="<%=type%>.rhtml?group=<%=w.group%>&name=<%=w.name%>&branch=<%=w.branch%>&head=<%=w.head%>&obj=<%=File.join(w.obj, name)%>"><%=name%></a></td>
+<td><a class="default" href="<%=type%>.rhtml?group=<%=w.group%>&name=<%=w.name%>&branch=<%=w.branch%>&head=<%=w.head%>&obj=<%=File.join(w.obj, name)%>"><%=type == 'blob' ? 'blob' : 'tree'%></a>
 </tr>
 <%end%></table>
 </div>
