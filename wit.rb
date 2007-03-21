@@ -60,6 +60,7 @@ class Wit
 			repo = Repo.new(@config[:git_bin], repinfo[:path])
 			info = repinfo.values_at(:name, :description, :owner)
 			lastcom = repo.commits.first
+			info.push(lastcom[:hash], lastcom[:parent].first)
 			info.push(trim(lastcom[:title], @config[:commit_length]))
 			info.push(last_update(lastcom[:committer_time] || lastcom[:author_time]))
 			yield(i % 2 == 0 ? 'odd' : 'even', *info)

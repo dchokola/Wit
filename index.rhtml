@@ -23,11 +23,11 @@ w = Wit.new%>
 <th>Owner</th>
 <th>Updated</th>
 </tr><%w.groups do |group|%>
-<tr><td class="group" colspan="6"><%=group%></td></tr><%w.repos(group) do |fmt, name, desc, owner, head, updated|%>
+<tr><td class="group" colspan="6"><%=group%></td></tr><%w.repos(group) do |fmt, name, desc, owner, head, parent, title, updated|%>
 <tr class="<%=fmt%>">
 <td><%=name%></td>
 <td><%=desc%></td>
-<td><%=head%></td>
+<td><a class="default" href="diff.rhtml?group=<%=group%>&amp;name=<%=name%>&amp;head=<%=head%><%if(parent)%>&amp;parent=<%=parent%><%end%>"><%=title%></a></td>
 <td><%=owner%></td>
 <td><%=updated%></td>
 <td><a class="default" href="commits.rhtml?group=<%=group%>&amp;name=<%=name%>">commits</a> | <a class="default" href="tree.rhtml?group=<%=group%>&amp;name=<%=name%>">tree</a> | <a class="default" href="snapshot.rhtml?group=<%=group%>&amp;name=<%=name%>">snapshot</a></td>
