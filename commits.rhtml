@@ -30,17 +30,17 @@ w = Wit.new%>
 <td><%=time%></td>
 <td><%=author%></td>
 <td><%=summary%></td>
-<td><a class="default" href="diff.rhtml?group=<%=w.group%>&name=<%=w.name%>&branch=<%=w.branch%>&head=<%=head%><%if(parent)%>&parent=<%=parent%><%end%>">diff</a> | <a class="default" href="tree.rhtml?group=<%=w.group%>&name=<%=w.name%>&head=<%=head%>&branch=<%=w.branch%>">tree</a> | <a class="default" href="snapshot.rhtml?group=<%=w.group%>&name=<%=w.name%>">snapshot</a></td>
+<td><a class="default" href="diff.rhtml?group=<%=w.group%>&amp;name=<%=w.name%>&amp;branch=<%=w.branch%>&amp;head=<%=head%><%if(parent)%>&amp;parent=<%=parent%><%end%>">diff</a> | <a class="default" href="tree.rhtml?group=<%=w.group%>&amp;name=<%=w.name%>&amp;head=<%=head%>&amp;branch=<%=w.branch%>">tree</a> | <a class="default" href="snapshot.rhtml?group=<%=w.group%>&amp;name=<%=w.name%>">snapshot</a></td>
 </tr>
 <%end%></table>
 <div class="branches">Branches</div>
 <table cellspacing="0" class="branches"><%w.branches do |fmt, branch|%>
 <tr class="<%=fmt%>"><td class="branch">
-<a href="commits.rhtml?group=<%=w.group%>&name=<%=w.name%>&branch=<%=branch%>"><%=branch%></a>
+<a href="commits.rhtml?group=<%=w.group%>&amp;name=<%=w.name%>&amp;branch=<%=branch%>"><%=branch%></a>
 </td></tr><%end%>
 </table>
 <div class="footer">
 <a class="opml" href="opml.rhtml">OPML</a><%w.next_page do |head|%>
-<a href="commits.rhtml?group=<%=w.group%>&name=<%=w.name%>&head=<%=head%>">Next</a><%end%>
+<a href="commits.rhtml?group=<%=w.group%>&amp;name=<%=w.name%>&amp;head=<%=head%>">Next</a><%end%>
 </div>
 </html><%w.close%>

@@ -30,7 +30,7 @@ w = Wit.new%>
 <div class="branches">Branches</div>
 <table cellspacing="0" class="branches"><%w.branches do |fmt, branch|%>
 <tr class="<%=fmt%>"><td class="branch">
-<a href="tree.rhtml?group=<%=w.group%>&name=<%=w.name%>&branch=<%=branch%>"><%=branch%></a>
+<a href="tree.rhtml?group=<%=w.group%>&amp;name=<%=w.name%>&amp;branch=<%=branch%>"><%=branch%></a>
 </td></tr><%end%>
 </table>
 <div class="footer">
