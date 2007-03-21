@@ -107,6 +107,9 @@ div.green {
 	white-space: pre;
 	color: #008800;
 }
+div.gray {
+	color: gray;
+}
 div.diff {
 	font-family: monospace;
 	font-size: 9pt;
@@ -160,6 +163,22 @@ td.group {
 	padding: 10px 0 0 0;
 	font-size: 10pt;
 	font-weight: bold;
+}
+td.num {
+	text-align: right;
+	vertical-align: center;
+	padding: 0 8px 0 0;
+	font-size: 9pt;
+	border-right: solid;
+	border-width: 1px;
+	border-color: gray;
+}
+td.pre {
+	text-align: left;
+	vertical-align: center;
+	padding: 0 8px 0 8px;
+	font-size: 9pt;
+	white-space: pre;
 }
 
 tr.odd {

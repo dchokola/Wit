@@ -35,7 +35,7 @@ class Wit
 		@name = params['name'].first
 		@limit = params['limit'].first || @config[:commits_per_page]
 		@branch = params['branch'].first || 'master'
-		@obj = File.join(params['obj'].first || '.', File::SEPARATOR)
+		@obj = params['obj'].first || '.'
 		@head = params['head'].first || @branch
 		@parent = params['parent'].first
 
@@ -117,10 +117,18 @@ class Wit
 	end
 
 	def tree(&block)
-		@repo.tree(@head, @obj).each_with_index do |object, i|
+		@repo.tree(@head, File.join(@obj, File::SEPARATOR)).each_with_index do |object, i|
 			info = [object[:type], object[:mode], object[:hash], File.basename(object[:name])]
 			info = info.map { |c| CGI.escapeHTML(c || '') }
 			yield(i % 2 == 0 ? 'odd' : 'even', *info)
+		end
+	end
+
+	def blob(&block)
+		hash = @repo.tree(@head, @obj).first[:hash]
+
+		@repo.blob(hash).each_with_index do |line, i|
+			yield(i, CGI.escapeHTML(line))
 		end
 	end
 
@@ -258,6 +266,10 @@ class Repo
 			  :hash => ary.shift,
 			  :name => ary.shift }
 		end
+	end
+
+	def blob(obj)
+		@git.cat_file('-p', obj).split("\n")
 	end
 
 	private

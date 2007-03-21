@@ -1,0 +1,39 @@
+Content-type: text/html; charset=UTF-8
+<%require 'wit'
+w = Wit.new%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<meta name="robots" content="index, nofollow"/>
+<link rel="stylesheet" type="text/css" href="style/gitweb.css"/>
+<title><%=w.group%>::<%=w.name%>.<%=w.branch%>('<%=w.obj%>')</title>
+</head>
+<body>
+<div class="header">
+<a href="http://www.kernel.org/pub/software/scm/git/docs/" title="git documentation">
+<img src="images/git.png" alt="git" class="logo"/>
+</a>
+<a href="."><%=w.group%>::<%=w.name%>.<%=w.branch%>('<%=w.obj%>')</a>
+</div>
+<div class="info">
+<table cellspacing="0" class="info"><%w.repo_info do |key, val|%>
+<tr><td class="info"><%=key%>:</td><td class="info"><%=val%></td></tr><%end%>
+</table>
+</div>
+<div class="spacing">
+<table cellspacing="0" class="blob">
+<%w.blob do |i, line|%><tr>
+<td class="num"><div class="gray"><%=i%></div></td><td class="pre"><%=line%></td>
+</tr>
+<%end%></table>
+</div>
+<div class="branches">Branches</div>
+<table cellspacing="0" class="branches"><%w.branches do |fmt, branch|%>
+<tr class="<%=fmt%>"><td class="branch">
+<a href="tree.rhtml?group=<%=w.group%>&name=<%=w.name%>&branch=<%=branch%>"><%=branch%></a>
+</td></tr><%end%>
+</table>
+<div class="footer">
+<a class="opml" href="opml.rhtml">OPML</a>
+</div>
+</html><%w.close%>
