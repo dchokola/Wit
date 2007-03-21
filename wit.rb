@@ -116,7 +116,7 @@ class Wit
 		end
 	end
 
-	def ls_tree(&block)
+	def tree(&block)
 		@repo.tree(@head, @obj).each_with_index do |object, i|
 			info = [object[:type], object[:mode], object[:hash], File.basename(object[:name])]
 			info = info.map { |c| CGI.escapeHTML(c || '') }
