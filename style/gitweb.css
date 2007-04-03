@@ -122,12 +122,15 @@ div.spacing {
 table.main {
 	width: 100%;
 	padding: 10px 10px 10px 10px;
+	table-layout: auto;
 }
 table.info {
 	padding: 10px 10px 10px 10px;
+	table-layout: auto;
 }
 table.branches {
 	padding: 10px 10px 10px 10px;
+	table-layout: auto;
 }
 
 th {
@@ -142,6 +145,7 @@ td {
 	vertical-align: middle;
 	padding: 2px 8px 2px 0;
 	font-size: 9pt;
+	white-space: nowrap;
 }
 td.info {
 	text-align: left;
