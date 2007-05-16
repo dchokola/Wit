@@ -77,7 +77,7 @@ class Wit
 			title = commit[:title]
 			title = title[0..title_len] + '...' if(title && title.length > title_len)
 			info = [time, commit[:author] || commit[:committer], title,
-			        commit[:hash], (commit[:parent] || []).first]
+			        commit[:hash]]
 
 			info = info.map { |c| CGI.escapeHTML(c || '') }
 			yield(i % 2 == 0 ? 'odd' : 'even', *info)
@@ -98,9 +98,9 @@ class Wit
 	end
 
 	def diff(&block)
-		parent = @parent || @repo.commits(1, @head).first[:parent].first
+		@parent ||= @repo.commits(1, @head).first[:parent].first
 
-		@repo.diff(head, parent).map do |line|
+		@repo.diff(head, @parent).map do |line|
 			style = 'diff'
 
 			case(line)
