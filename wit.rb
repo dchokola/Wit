@@ -153,7 +153,6 @@ class Wit
 		cominfo = @repo.commits(1, @head).first
 		info = []
 		tmp = nil
-		time =
 
 		tmp = cominfo[:author_email].sub('@', ' at ')
 		time = last_update(cominfo[:author_time])
