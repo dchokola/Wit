@@ -98,7 +98,7 @@ class Wit
 	end
 
 	def diff(&block)
-		@parent ||= @repo.commits(1, @head).first[:parent].first
+		@parent ||= (@repo.commits(1, @head).first[:parent] || []).first
 
 		@repo.diff(head, @parent).map do |line|
 			style = 'diff'
