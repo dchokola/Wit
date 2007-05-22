@@ -133,6 +133,22 @@ class Wit
 		end
 	end
 
+	def blame(&block)
+		ary = @repo.blame(@head, @obj[2..-1])
+
+		ary.each_with_index do |group, i|
+			hash = ary.find { |a| a[:hash] == group[:hash] }
+			group = hash.merge(group) if hash
+			group.each { |key, value| group[key] = CGI.escapeHTML(value) if value.is_a?(String) }
+			group[:lines].each do |line|
+				line.each { |key, value| line[key] = CGI.escapeHTML(value) if value.is_a?(String) }
+			end
+			author = group[:author] || group[:committer]
+			time = last_update(group[:author_time] || group[:committer_time])
+			yield(i % 2 == 0 ? 'odd' : 'even', author, time, group[:lines])
+		end
+	end
+
 	def commit_info(&block)
 		cominfo = @repo.commits(1, @head).first
 		info = []
@@ -271,6 +287,53 @@ class Repo
 
 	def blob(obj)
 		@git.cat_file('-p', obj).split("\n")
+	end
+
+	def blame(head, obj)
+		data = @git.blame('-p', '--since', head, '--', obj).split("\n")
+		blames = []
+
+		data.each do |line|
+			ary = line.split(/\s+/)
+
+			case ary.first
+				when /\w{40}/
+					if match = line.match(/(\w{40})\s+(\d+)\s+(\d+)\s+(\d+)/)
+						line = { :hash => match[1],
+						         :lineno_orig => match[2].to_i,
+						         :lineno_final => match[3].to_i,
+						         :num_lines => match[4].to_i }
+						blames.push({ :lines => [line] })
+					elsif match = line.match(/(\w{40})\s+(\d+)\s+(\d+)/)
+						line = { :hash => match[1],
+						         :lineno_orig => match[2].to_i,
+						         :lineno_final => match[3].to_i }
+						blames.last[:lines].push(line)
+					end
+				when /author|committer/
+					case ary.first
+						when /(.+)-mail$/
+							# I hate using $1.
+							blames.last[:"#{$1}_email"] = ary.last[1..-2]
+						when /(.+)-time$/
+							# Really, I do.
+							blames.last[:"#{$1}_time"] = Time.at(ary.last.to_i)
+						when /-tz$/
+							next
+						when /(author|committer)/
+							# $1 makes me feel dirty, but it's so convenient.
+							blames.last[$1.to_sym] = line.sub(/#{$1}\s+/, '')
+					end
+				when /filename/
+					blames.last[:filename] = ary.last
+				when /summary/
+					blames.last[:summary] = line.sub(/summary\s+/, '')
+				when ''
+					blames.last[:lines].last[:content] = line[1..-1]
+			end
+		end
+
+		blames
 	end
 
 	private
