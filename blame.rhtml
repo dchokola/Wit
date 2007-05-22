@@ -22,9 +22,9 @@ w = Wit.new%>
 </div>
 <div class="spacing">
 <table cellspacing="0" class="blame">
-<%w.blame do |fmt, author, time, lines|
+<%w.blame do |fmt, author, summary, time, lines|
 lines.each_with_index do |line, i|%><tr class="<%=fmt%>">
-<td><%if i.zero?%><a class="default" title="<%=time%>" href="diff.rhtml?group=<%=w.group%>&amp;name=<%=w.name%>&amp;branch=<%=w.branch%>&amp;head=<%=line[:hash]%>"><%=author%></a><%end%></td><td class="num"><div class="gray"><%=line[:lineno_final]%></div></td><td class="pre"><%=line[:content]%></td>
+<td><%if i.zero?%><a class="default" title="<%=summary%> (<%=time%>)" href="diff.rhtml?group=<%=w.group%>&amp;name=<%=w.name%>&amp;branch=<%=w.branch%>&amp;head=<%=line[:hash]%>"><%=author%></a><%end%></td><td class="num"><div class="gray"><%=line[:lineno_final]%></div></td><td class="pre"><%=line[:content]%></td>
 </tr>
 <%end%></td>
 </tr>

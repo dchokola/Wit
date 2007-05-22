@@ -145,7 +145,7 @@ class Wit
 			end
 			author = group[:author] || group[:committer]
 			time = last_update(group[:author_time] || group[:committer_time])
-			yield(i % 2 == 0 ? 'odd' : 'even', author, time, group[:lines])
+			yield(i % 2 == 0 ? 'odd' : 'even', author, group[:summary], time, group[:lines])
 		end
 	end
 
