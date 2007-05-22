@@ -1,0 +1,25 @@
+Content-type: application/rss+xml; charset=UTF-8
+<%require 'wit'
+
+require 'time'
+require 'rss/maker'
+
+w = Wit.new
+rss = RSS::Maker.make('2.0') do |maker|
+basename = "http://#{ENV['SERVER_NAME']}#{File.dirname(ENV['REQUEST_URI'])}"
+
+	maker.channel.link = "#{basename}commits.rhtml?group=#{w.group}&name=#{w.name}&branch=#{w.branch}"
+	maker.channel.title = w.title
+	maker.channel.description = "#{w.title} - #{w.name} tree (#{w.branch} branch)"
+
+	w.commits do |fmt, time, author, summary, head|
+		item = maker.items.new_item
+
+		item.author = author
+		item.link = "#{basename}/diff.rhtml?group=#{w.group}&name=#{w.name}&branch=#{w.branch}&head=#{head}"
+		item.title = summary
+		item.date = Time.parse(time)
+		item.description = summary
+	end
+end%>
+<%=rss%>

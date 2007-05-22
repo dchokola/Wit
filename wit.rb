@@ -67,11 +67,11 @@ class Wit
 		end
 	end
 
-	def commits(&block)
+	def commits(num = nil, &block)
 		timefmt = @config[:commit_time_format]
 		title_len = @config[:commit_length]
 
-		@repo.commits(@limit, @head).each_with_index do |commit, i|
+		@repo.commits(num || @limit, @head).each_with_index do |commit, i|
 			time = commit[:committer_time] || commit[:author_time]
 			time = time.utc.strftime(timefmt) if(time)
 			title = commit[:title]

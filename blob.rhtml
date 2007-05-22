@@ -34,7 +34,7 @@ w = Wit.new%>
 </td></tr><%end%>
 </table>
 <div class="footer">
-<a class="opml" href="opml.rhtml">OPML</a>
+<a class="feed" href="rss.rhtml?group=<%=w.group%>&amp;name=<%=w.name%>&amp;branch=<%=w.branch%>">RSS</a>
 </div>
 </body>
 </html><%w.close%>

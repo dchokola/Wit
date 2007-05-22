@@ -14,7 +14,7 @@ a.default {
 a:link {
 	color: #4488BB;
 }
-a.opml {
+a.feed {
 	float: right;
 	padding: 3px 0px;
 	width: 35px;
