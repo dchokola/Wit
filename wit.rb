@@ -129,7 +129,7 @@ class Wit
 		hash = @repo.tree(@head, @obj).first[:hash]
 
 		@repo.blob(hash).each_with_index do |line, i|
-			yield(i, CGI.escapeHTML(line))
+			yield(i + 1, CGI.escapeHTML(line))
 		end
 	end
 
