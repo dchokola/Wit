@@ -139,7 +139,7 @@ class Wit
 	end
 
 	def blame(&block)
-		ary = @repo.blame(@head, @obj[2..-1])
+		ary = @repo.blame(@head, @obj.sub(/^(?:\.\/|\/)+/, ''))
 
 		ary.each_with_index do |group, i|
 			hash = ary.find { |a| a[:hash] == group[:hash] }
