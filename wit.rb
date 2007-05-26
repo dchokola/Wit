@@ -58,13 +58,12 @@ class Wit
 	def repos(group, &block)
 		@config[:groups].find { |h| h[:name] == group }[:repos].each_with_index do |repinfo, i|
 			repo = Repo.new(@config[:git_bin], repinfo[:path])
-			info = repinfo.values_at(:name, :description, :owner)
+			info = repinfo.values_at(:name, :description, :owner, :clone_url)
 			lastcom = repo.commits.first
 			time = [lastcom[:author_time], lastcom[:committer_time]].compact.max
 			info.push(lastcom[:hash], lastcom[:parent].first)
 			info.push(trim(lastcom[:title], @config[:commit_length]))
-			info.push(lastcom[:title])
-			info.push(last_update(time))
+			info.push(lastcom[:title], last_update(time))
 			yield(i % 2 == 0 ? 'odd' : 'even', *info)
 		end
 	end
