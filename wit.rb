@@ -74,7 +74,11 @@ class Wit
 
 		@repo.commits(num || @limit, @head).each_with_index do |commit, i|
 			time = [commit[:author_time], commit[:committer_time]].compact.max
-			time = time.utc.strftime(timefmt) if(time)
+			if @config[:elapsed_commit_times] ||= true
+				time = last_update(time)
+			else
+				time = time.utc.strftime(timefmt) if(time)
+			end
 			title = commit[:title]
 			title = title[0..title_len] + '...' if(title && title.length > title_len)
 			info = [time, commit[:author] || commit[:committer], title,
