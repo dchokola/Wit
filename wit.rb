@@ -152,6 +152,7 @@ class Wit
 
 	def commit_info(&block)
 		cominfo = @repo.commits(1, @head).first
+		timefmt = @config[:commit_time_format]
 		info = []
 		tmp = nil
 
@@ -163,6 +164,10 @@ class Wit
 		info.push(['committer', "#{cominfo[:committer]} <#{tmp}> (#{time})"])
 		tmp = "#{cominfo[:title]}\n#{cominfo[:description]}".chomp
 		info.push(['commit message', tmp])
+		tmp = cominfo[:author_time]
+		info.push(['author time', tmp.utc.strftime(timefmt)]) if(tmp)
+		tmp = cominfo[:committer_time]
+		info.push(['committer time', tmp.utc.strftime(timefmt)]) if(tmp)
 
 		info.each { |(key, val)| yield(CGI.escapeHTML(key), CGI.escapeHTML(val).gsub("\n", '<br/>')) }
 	end
