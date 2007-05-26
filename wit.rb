@@ -63,6 +63,7 @@ class Wit
 			time = [lastcom[:author_time], lastcom[:committer_time]].compact.max
 			info.push(lastcom[:hash], lastcom[:parent].first)
 			info.push(trim(lastcom[:title], @config[:commit_length]))
+			info.push(lastcom[:title])
 			info.push(last_update(time))
 			yield(i % 2 == 0 ? 'odd' : 'even', *info)
 		end
@@ -70,7 +71,6 @@ class Wit
 
 	def commits(num = nil, &block)
 		timefmt = @config[:commit_time_format]
-		title_len = @config[:commit_length]
 
 		@repo.commits(num || @limit, @head).each_with_index do |commit, i|
 			time = [commit[:author_time], commit[:committer_time]].compact.max
@@ -79,10 +79,9 @@ class Wit
 			else
 				time = time.utc.strftime(timefmt) if(time)
 			end
-			title = commit[:title]
-			title = title[0..title_len] + '...' if(title && title.length > title_len)
+			title = trim(commit[:title], @config[:commit_length])
 			info = [time, commit[:author] || commit[:committer], title,
-			        commit[:hash]]
+			        commit[:title], commit[:hash]]
 
 			info = info.map { |c| CGI.escapeHTML(c || '') }
 			yield(i % 2 == 0 ? 'odd' : 'even', *info)
