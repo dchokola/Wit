@@ -60,9 +60,10 @@ class Wit
 			repo = Repo.new(@config[:git_bin], repinfo[:path])
 			info = repinfo.values_at(:name, :description, :owner)
 			lastcom = repo.commits.first
+			time = [lastcom[:author_time], lastcom[:committer_time]].compact.max
 			info.push(lastcom[:hash], lastcom[:parent].first)
 			info.push(trim(lastcom[:title], @config[:commit_length]))
-			info.push(last_update(lastcom[:committer_time] || lastcom[:author_time]))
+			info.push(last_update(time))
 			yield(i % 2 == 0 ? 'odd' : 'even', *info)
 		end
 	end
@@ -72,7 +73,7 @@ class Wit
 		title_len = @config[:commit_length]
 
 		@repo.commits(num || @limit, @head).each_with_index do |commit, i|
-			time = commit[:committer_time] || commit[:author_time]
+			time = [commit[:author_time], commit[:committer_time]].compact.max
 			time = time.utc.strftime(timefmt) if(time)
 			title = commit[:title]
 			title = title[0..title_len] + '...' if(title && title.length > title_len)
@@ -168,11 +169,11 @@ class Wit
 
 	def repo_info(&block)
 		commit = @repo.commits.first
-		time = commit[:author_time] || commit[:committer_time]
+		time = [commit[:author_time], commit[:committer_time]].compact.max
 		info = [['Group', @group],
 		        ['Name', @name],
 		        ['Description', @repoconfig[:description]],
-		        ['Last modified', last_update(time)]]
+		        ['Last updated', last_update(time)]]
 
 		info.each { |(key, val)| yield(CGI.escapeHTML(key), CGI.escapeHTML(val)) }
 	end
