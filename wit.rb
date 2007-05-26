@@ -84,6 +84,7 @@ class Wit
 			        commit[:title], commit[:hash]]
 
 			info = info.map { |c| CGI.escapeHTML(c || '') }
+			commit_substitutions(info[2])
 			info.push(rawtime) if show_raw_time
 			yield(i % 2 == 0 ? 'odd' : 'even', *info)
 		end
@@ -169,13 +170,33 @@ class Wit
 		time = last_update(cominfo[:committer_time])
 		info.push(['committer', "#{cominfo[:committer]} <#{tmp}> (#{time})"])
 		tmp = "#{cominfo[:title]}\n#{cominfo[:description]}".chomp
-		info.push(['commit message', tmp])
+		info.push(['commit message', commit_substitutions(CGI.escapeHTML(tmp))])
 		tmp = cominfo[:author_time]
 		info.push(['author time', tmp.utc.strftime(timefmt)]) if(tmp)
 		tmp = cominfo[:committer_time]
 		info.push(['committer time', tmp.utc.strftime(timefmt)]) if(tmp)
 
-		info.each { |(key, val)| yield(CGI.escapeHTML(key), CGI.escapeHTML(val).gsub("\n", '<br/>')) }
+		info.each do |(key, val)|
+			hkey = CGI.escapeHTML(key)
+			hval = key == 'commit message' ? val : CGI.escapeHTML(val)
+			yield hkey, hval.gsub("\n", '<br/>')
+		end
+	end
+
+	def commit_substitutions(commit)
+		return unless @repoconfig
+
+		(@repoconfig[:substitutions] ||= []).each do |sub|
+			next unless sub[:regexp] && sub[:replace]
+			regexp = Regexp.compile(sub[:regexp])
+			if sub[:global]
+				commit.gsub!(regexp, sub[:replace].to_s)
+			else
+				commit.sub!(regexp, sub[:replace].to_s)
+			end
+		end
+
+		commit
 	end
 
 	def repo_info(&block)
