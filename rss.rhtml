@@ -12,7 +12,7 @@ basename = "http://#{ENV['SERVER_NAME']}#{File.dirname(ENV['REQUEST_URI'])}"
 	maker.channel.title = CGI.unescapeHTML(w.title)
 	maker.channel.description = CGI.unescapeHTML("#{w.title} - #{w.name} tree (#{w.branch} branch)")
 
-	w.commits do |fmt, time, author, summary, head|
+	w.commits(15) do |fmt, time, author, summary, head|
 		item = maker.items.new_item
 
 		item.author = CGI.unescapeHTML(author)
