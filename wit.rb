@@ -69,21 +69,22 @@ class Wit
 		end
 	end
 
-	def commits(num = nil, &block)
+	def commits(num = nil, show_raw_time = nil, &block)
 		timefmt = @config[:commit_time_format]
 
 		@repo.commits(num || @limit, @head).each_with_index do |commit, i|
-			time = [commit[:author_time], commit[:committer_time]].compact.max
+			rawtime = [commit[:author_time], commit[:committer_time]].compact.max
 			if @config[:elapsed_commit_times] ||= true
-				time = last_update(time)
+				time = last_update(rawtime)
 			else
-				time = time.utc.strftime(timefmt) if(time)
+				time = rawtime.utc.strftime(timefmt) if(rawtime)
 			end
 			title = trim(commit[:title], @config[:commit_length])
 			info = [time, commit[:author] || commit[:committer], title,
 			        commit[:title], commit[:hash]]
 
 			info = info.map { |c| CGI.escapeHTML(c || '') }
+			info.push(rawtime) if show_raw_time
 			yield(i % 2 == 0 ? 'odd' : 'even', *info)
 		end
 	end

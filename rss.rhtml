@@ -12,13 +12,13 @@ basename = "http://#{ENV['SERVER_NAME']}#{File.dirname(ENV['REQUEST_URI'])}"
 	maker.channel.title = CGI.unescapeHTML(w.title)
 	maker.channel.description = CGI.unescapeHTML("#{w.title} - #{w.name} tree (#{w.branch} branch)")
 
-	w.commits(15) do |fmt, time, author, summary, commitmsg, head|
+	w.commits(15, true) do |fmt, time, author, summary, commitmsg, head, rawtime|
 		item = maker.items.new_item
 
 		item.author = CGI.unescapeHTML(author)
 		item.link = "#{basename}/diff.rhtml?group=#{w.group}&name=#{w.name}&branch=#{w.branch}&head=#{head}"
 		item.title = CGI.unescapeHTML(summary)
-		item.date = Time.parse(time)
+		item.date = rawtime
 		item.description = commitmsg
 	end
 end%>
