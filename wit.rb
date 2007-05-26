@@ -160,10 +160,12 @@ class Wit
 		info = []
 		tmp = nil
 
-		tmp = cominfo[:author_email].sub('@', ' at ')
+		tmp = cominfo[:author_email]
+		tmp.sub!('@', ' at ') if @config[:protect_email_addresses] ||= false
 		time = last_update(cominfo[:author_time])
 		info.push(['author', "#{cominfo[:author]} <#{tmp}> (#{time})"])
-		tmp = cominfo[:committer_email].sub('@', ' at ')
+		tmp = cominfo[:committer_email]
+		tmp.sub!('@', ' at ') if @config[:protect_email_addresses] ||= false
 		time = last_update(cominfo[:committer_time])
 		info.push(['committer', "#{cominfo[:committer]} <#{tmp}> (#{time})"])
 		tmp = "#{cominfo[:title]}\n#{cominfo[:description]}".chomp
