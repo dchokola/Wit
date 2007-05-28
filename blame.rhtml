@@ -26,9 +26,8 @@ w = Wit.new%>
 lines.each_with_index do |line, i|%><tr class="<%=fmt%>">
 <td><%if i.zero?%><a class="default" title="<%=summary%> (<%=time%>)" href="<%=w.path%>/diff.rhtml/<%=w.group%>/<%=w.name%>/?branch=<%=w.branch%>&amp;head=<%=line[:hash]%>"><%=author%></a><%end%></td><td class="num"><div class="gray"><%=line[:lineno_final]%></div></td><td class="pre"><%=line[:content]%></td>
 </tr>
-<%end%></td>
-</tr>
-<%end%></table>
+<%end
+end%></table>
 </div>
 <div class="footer">
 <a class="feed" href="<%=w.path%>/rss.rhtml/<%=w.group%>/<%=w.name%>/?branch=<%=w.branch%>">RSS</a>
