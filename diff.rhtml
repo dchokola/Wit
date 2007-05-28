@@ -5,15 +5,15 @@ w = Wit.new%>
 <html>
 <head>
 <meta name="robots" content="index, nofollow"/>
-<link rel="stylesheet" type="text/css" href="style/gitweb.css"/>
+<link rel="stylesheet" type="text/css" href="<%=w.path%>/style/gitweb.css"/>
 <title><%=w.group%>::<%=w.name%>.<%=w.branch%></title>
 </head>
 <body>
 <div class="header">
 <a href="http://www.kernel.org/pub/software/scm/git/docs/" title="git documentation">
-<img src="images/git.png" alt="git" class="logo"/>
+<img src="<%=w.path%>/images/git.png" alt="git" class="logo"/>
 </a>
-<a href="."><%=w.group%>::<%=w.name%>.<%=w.branch%></a>
+<a href="<%=w.path%>/"><%=w.group%>::<%=w.name%>.<%=w.branch%></a>
 </div>
 <div class="info">
 <table cellspacing="0" class="info"><%w.commit_info do |key, val|%>
@@ -24,7 +24,7 @@ w = Wit.new%>
 <div class="<%=style%>"><%=line%></div><%end%>
 </div>
 <div class="footer">
-<a class="feed" href="rss.rhtml?group=<%=w.group%>&amp;name=<%=w.name%>&amp;branch=<%=w.branch%>">RSS</a>
+<a class="feed" href="rss.rhtml/<%=w.group%>/<%=w.name%>/?branch=<%=w.branch%>">RSS</a>
 </div>
 </body>
 </html><%w.close%>

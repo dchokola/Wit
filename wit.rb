@@ -6,6 +6,7 @@ require 'git'
 CONFIGFILE = 'config.yaml'
 
 class Wit
+	attr_accessor :path
 	def initialize
 		begin
 			@config = YAML.load_file(CONFIGFILE)
@@ -16,7 +17,12 @@ class Wit
 			end
 			@config = {}
 		end
-		params = CGI.new.params
+		cgi = CGI.new
+		params = cgi.params
+		pathinfo = (cgi.path_info || '').split('/')[1..-1] || []
+		pathinfo.map { |s| CGI.unescape(s) }
+
+		@path = File.split(ENV['SCRIPT_NAME']).first
 
 		# some default values
 		@config[:title] ||= 'Wit'
@@ -31,8 +37,8 @@ class Wit
 
 		# some attributes
 		@title = @config[:title]
-		@group = params['group'].first
-		@name = params['name'].first
+		@group = pathinfo.shift || params['group'].first
+		@name = pathinfo.shift || params['name'].first
 		@limit = params['limit'].first || @config[:commits_per_page]
 		@branch = params['branch'].first || 'master'
 		@obj = params['obj'].first || '.'

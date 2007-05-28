@@ -8,7 +8,7 @@ w = Wit.new
 rss = RSS::Maker.make('2.0') do |maker|
 basename = "http://#{ENV['SERVER_NAME']}#{File.dirname(ENV['REQUEST_URI'])}"
 
-	maker.channel.link = "#{basename}commits.rhtml?group=#{w.group}&name=#{w.name}&branch=#{w.branch}"
+	maker.channel.link = "#{basename}commits.rhtml/#{w.group}/#{w.name}/?branch=#{w.branch}"
 	maker.channel.title = CGI.unescapeHTML(w.title)
 	maker.channel.description = CGI.unescapeHTML("#{w.title} - #{w.name} tree (#{w.branch} branch)")
 
@@ -16,7 +16,7 @@ basename = "http://#{ENV['SERVER_NAME']}#{File.dirname(ENV['REQUEST_URI'])}"
 		item = maker.items.new_item
 
 		item.author = CGI.unescapeHTML(author)
-		item.link = "#{basename}/diff.rhtml?group=#{w.group}&name=#{w.name}&branch=#{w.branch}&head=#{head}"
+		item.link = "#{basename}/diff.rhtml/#{w.group}/#{w.name}/?branch=#{w.branch}&head=#{head}"
 		item.title = CGI.unescapeHTML(summary)
 		item.date = rawtime
 		item.description = commitmsg

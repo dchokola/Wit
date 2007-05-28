@@ -5,15 +5,15 @@ w = Wit.new%>
 <html>
 <head>
 <meta name="robots" content="index, nofollow"/>
-<link rel="stylesheet" type="text/css" href="style/gitweb.css"/>
+<link rel="stylesheet" type="text/css" href="<%=w.path%>/style/gitweb.css"/>
 <title><%=w.group%>::<%=w.name%>.<%=w.branch%></title>
 </head>
 <body>
 <div class="header">
 <a href="http://www.kernel.org/pub/software/scm/git/docs/" title="git documentation">
-<img src="images/git.png" alt="git" class="logo"/>
+<img src="<%=w.path%>/images/git.png" alt="git" class="logo"/>
 </a>
-<a href="."><%=w.group%>::<%=w.name%>.<%=w.branch%></a>
+<a href="<%=w.path%>/"><%=w.group%>::<%=w.name%>.<%=w.branch%></a>
 </div>
 <div class="info">
 <table cellspacing="0" class="info"><%w.repo_info do |key, val|%>
@@ -30,18 +30,18 @@ w = Wit.new%>
 <td><%=time%></td>
 <td><%=author%></td>
 <td title="<%=commitmsg%>"><%=summary%></td>
-<td><a class="default" href="diff.rhtml?group=<%=w.group%>&amp;name=<%=w.name%>&amp;branch=<%=w.branch%>&amp;head=<%=head%>">diff</a> | <a class="default" href="tree.rhtml?group=<%=w.group%>&amp;name=<%=w.name%>&amp;head=<%=head%>&amp;branch=<%=w.branch%>">tree</a> | <a class="default" href="snapshot.rhtml?group=<%=w.group%>&amp;name=<%=w.name%>">snapshot</a></td>
+<td><a class="default" href="<%=w.path%>/diff.rhtml/<%=w.group%>/<%=w.name%>/?branch=<%=w.branch%>&amp;head=<%=head%>">diff</a> | <a class="default" href="<%=w.path%>/tree.rhtml/<%=w.group%>/<%=w.name%>/?head=<%=head%>&amp;branch=<%=w.branch%>">tree</a> | <a class="default" href="<%=w.path%>/snapshot.rhtml/<%=w.group%>/<%=w.name%>">snapshot</a></td>
 </tr>
 <%end%></table>
 <div class="branches">Branches</div>
 <table cellspacing="0" class="branches"><%w.branches do |fmt, branch|%>
 <tr class="<%=fmt%>"><td class="branch">
-<a href="commits.rhtml?group=<%=w.group%>&amp;name=<%=w.name%>&amp;branch=<%=branch%>"><%=branch%></a>
+<a href="<%=w.path%>/commits.rhtml/<%=w.group%>/<%=w.name%>/?branch=<%=branch%>"><%=branch%></a>
 </td></tr><%end%>
 </table>
 <div class="footer">
-<a class="feed" href="rss.rhtml?group=<%=w.group%>&amp;name=<%=w.name%>&amp;branch=<%=w.branch%>">RSS</a><%w.next_page do |head|%>
-<a href="commits.rhtml?group=<%=w.group%>&amp;name=<%=w.name%>&amp;head=<%=head%>">Next</a><%end%>
+<a class="feed" href="<%=w.path%>/rss.rhtml/<%=w.group%>/<%=w.name%>/?branch=<%=w.branch%>">RSS</a><%w.next_page do |head|%>
+<a href="<%=w.path%>/commits.rhtml/<%=w.group%>/<%=w.name%>/?head=<%=head%>">Next</a><%end%>
 </div>
 </body>
 </html><%w.close%>
