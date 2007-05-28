@@ -74,7 +74,7 @@ class Wit
 		end
 	end
 
-	def commits(num = nil, show_raw_time = nil, &block)
+	def commits(num = nil, raw = nil, &block)
 		timefmt = @config[:commit_time_format]
 
 		@repo.commits(num || @limit, @head).each_with_index do |commit, i|
@@ -89,8 +89,11 @@ class Wit
 			        commit[:title], commit[:hash]]
 
 			info = info.map { |c| CGI.escapeHTML(c || '') }
-			commit_substitutions(info[2])
-			info.push(rawtime) if show_raw_time
+			if raw
+				info.push(rawtime)
+			else
+				commit_substitutions(info[2])
+			end
 			yield(i % 2 == 0 ? 'odd' : 'even', *info)
 		end
 	end
