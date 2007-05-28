@@ -27,12 +27,6 @@ w = Wit.new%>
 </tr>
 <%end%></table>
 </div>
-<div class="branches">Branches</div>
-<table cellspacing="0" class="branches"><%w.branches do |fmt, branch|%>
-<tr class="<%=fmt%>"><td class="branch">
-<a href="<%=w.path%>/tree.rhtml/<%=w.group%>/<%=w.name%>/?branch=<%=branch%>"><%=branch%></a>
-</td></tr><%end%>
-</table>
 <div class="footer">
 <a class="feed" href="<%=w.path%>/rss.rhtml/<%=w.group%>/<%=w.name%>/?branch=<%=w.branch%>">RSS</a>
 </div>
