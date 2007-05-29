@@ -181,6 +181,7 @@ td.pre {
 	text-align: left;
 	vertical-align: middle;
 	padding: 0 8px 0 8px;
+	font-family: monospace;
 	font-size: 9pt;
 	white-space: pre;
 }
