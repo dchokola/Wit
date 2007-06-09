@@ -16,3 +16,6 @@
     :path: ~/git/bar/.git/
     :owner: You
     :description: Implements Barclass
+    - :regexp: (ISSUE)\((\d+)\)
+      :replace: \1(<a href="http://my.project/bugtracker/?id=\2">\2</a>)
+      :global: true
