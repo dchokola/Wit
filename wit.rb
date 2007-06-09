@@ -19,7 +19,8 @@ class Wit
 		end
 		cgi = CGI.new
 		params = cgi.params
-		pathinfo = (cgi.path_info || '').split('/')[1..-1] || []
+		pathinfo = (cgi.path_info || '').split(File.basename(__FILE__))
+		pathinfo = (pathinfo[1] || '').split('/') || []
 		pathinfo.map { |s| CGI.unescape(s) }
 
 		@path = File.split(ENV['SCRIPT_NAME']).first
