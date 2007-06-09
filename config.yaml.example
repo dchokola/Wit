@@ -1,21 +1,26 @@
 ---
-:title: Puzzles' Wit
-:git_bin: git
-:commit_time_format: "%Y/%m/%d %H:%M:%S"
-:commits_per_page: 50
-:tab_width: 4
-:groups:
-- :name: FooBar
+:title: Puzzles' Wit # Title displayed on all pages.
+:git_bin: git # Your git binary. (Searches $PATH.)
+:commit_time_format: "%Y/%m/%d %H:%M:%S" # See Time#strftime.
+:commits_per_page: 50 # How many commits are shown on a page in commit view.
+:tab_width: 4 # Width, in spaces, of tabs when displayed in a browser.
+:groups: # Repositories are grouped together in an ordered list of groups.
+- :name: FooBar # A group named FooBar.
+  :repos: # FooBar contains the following repositories:
+  - :name: Foo # The Foo repository.
+    :path: ~/git/foo/.git/ # Location.
+    :owner: You # Who owns this repository.
+    :description: Implements FooClass # A short, one-liner description.
   :repos:
-  - :name: Foo
-    :path: ~/git/foo/.git/
-    :owner: You
-    :description: Implements FooClass
-  :repos:
-  - :name: Bar
+  - :name: Bar # The Bar repository.
     :path: ~/git/bar/.git/
     :owner: You
     :description: Implements Barclass
-    - :regexp: (ISSUE)\((\d+)\)
-      :replace: \1(<a href="http://my.project/bugtracker/?id=\2">\2</a>)
-      :global: true
+    # The replacement feature allows the commit messages in commit view to be
+    # substituted. This is a great help for things like bugtracker integration.
+    # In this example, a string like ISSUE #42 becomes a hyperlink to the issue
+    # on the bugtracker.
+    - :regexp: "(ISSUE)\s+#(\d+)" # Regular expression to match.
+      # Replacement string; may contain backreferences.
+      :replace: "\1 #<a href="http://my.project/bugtracker/?id=\2">\2</a>"
+      :global: true # Substitute globally?
