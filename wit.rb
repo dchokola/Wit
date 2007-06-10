@@ -57,8 +57,10 @@ class Wit
 		end
 
 		if(@group && @name)
-			repos = @config[:groups].find { |grp| grp[:name] == @group }[:repos]
+			group = @config[:groups].find { |grp| grp[:name] == @group }
+			return unless group && repos = group[:repos]
 			@repoconfig = repos.find { |repo| repo[:name] == @name }
+			return unless @repoconfig
 			@repo = Repo.new(@config[:git_bin], @repoconfig[:path])
 		end
 	end
