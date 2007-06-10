@@ -17,15 +17,18 @@ class Wit
 			end
 			@config = {}
 		end
-		file = ENV['PATH_TRANSLATED']
-		begin
-			break if File.exists?(file)
-		end while file != (file = File.split(file).first)
+		if file = ENV['PATH_TRANSLATED'] # Apache
+			begin
+				break if File.exists?(file)
+			end while file != (file = File.split(file).first)
+		else # Lighttpd
+			file = ENV['SCRIPT_FILENAME']
+		end
 
 		cgi = CGI.new
 		params = cgi.params
 		pathinfo = (cgi.path_info || '').split(File.basename(file))
-		pathinfo = (pathinfo[1] || '').split('/').delete_if { |a| a.empty? } || []
+		pathinfo = (pathinfo.last || '').split('/').delete_if { |a| a.empty? } || []
 		pathinfo.map! { |s| CGI.unescape(s) }
 
 		@path = ENV['REQUEST_URI'].split(File.basename(file)).first.sub(/\/+$/, '')
