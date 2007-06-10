@@ -17,13 +17,18 @@ class Wit
 			end
 			@config = {}
 		end
+		file = ENV['PATH_TRANSLATED']
+		begin
+			break if File.exists?(file)
+		end while file != (file = File.split(file).first)
+
 		cgi = CGI.new
 		params = cgi.params
-		pathinfo = (cgi.path_info || '').split(File.basename(__FILE__))
-		pathinfo = (pathinfo[1] || '').split('/') || []
-		pathinfo.map { |s| CGI.unescape(s) }
+		pathinfo = (cgi.path_info || '').split(File.basename(file))
+		pathinfo = (pathinfo[1] || '').split('/').delete_if { |a| a.empty? } || []
+		pathinfo.map! { |s| CGI.unescape(s) }
 
-		@path = File.split(ENV['SCRIPT_NAME']).first
+		@path = ENV['REQUEST_URI'].split(File.basename(file)).first.sub(/\/+$/, '')
 
 		# some default values
 		@config[:title] ||= 'Wit'

@@ -24,7 +24,7 @@ w = Wit.new%>
 <div class="<%=style%>"><%=line%></div><%end%>
 </div>
 <div class="footer">
-<a class="feed" href="rss.rhtml/<%=w.group%>/<%=w.name%>/?branch=<%=w.branch%>">RSS</a>
+<a class="feed" href="<%=w.path%>/rss.rhtml/<%=w.group%>/<%=w.name%>/?branch=<%=w.branch%>">RSS</a>
 </div>
 </body>
 </html><%w.close%>
