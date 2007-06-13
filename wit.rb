@@ -226,7 +226,7 @@ class Wit
 		        ['Description', @repoconfig[:description]],
 		        ['Last updated', last_update(time)]]
 
-		info.each { |(key, val)| yield(CGI.escapeHTML(key), CGI.escapeHTML(val)) }
+		info.each { |(key, val)| yield(CGI.escapeHTML(key.to_s), CGI.escapeHTML(val.to_s)) }
 	end
 
 	def close
