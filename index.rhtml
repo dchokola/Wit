@@ -27,7 +27,7 @@ w = Wit.new%>
 <tr class="<%=fmt%>">
 <td><%=name%></td>
 <td><%=desc%></td>
-<td><a class="default" title="<%=commitmsg%>" href="<%=w.path%>/diff.rhtml/<%=group%>/<%=name%>/?head=<%=head%><%if(parent)%>&amp;parent=<%=parent%><%end%>"><%=commitmsg%></a></td>
+<td><a class="default" title="<%=commitmsg%>" href="<%=w.path%>/diff.rhtml/<%=group%>/<%=name%>/?head=<%=head%>"><%=commitmsg%></a></td>
 <td><%=owner%></td>
 <td><%=updated%></td>
 <td><a class="default" href="<%=w.path%>/commits.rhtml/<%=group%>/<%=name%>">commits</a> | <a class="default" href="<%=w.path%>/tree.rhtml/<%=group%>/<%=name%>">tree</a> | <a class="default" href="<%=w.path%>/snapshot.rhtml/<%=group%>/<%=name%>">snapshot</a><%if clone%> | <a class="default" href="<%=clone%>">clone</a><%end%></td>
