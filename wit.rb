@@ -39,9 +39,6 @@ class Wit
 		@config[:git_bin] ||= 'git'
 		@config[:tab_width] ||= 4
 		@config[:commits_per_page] ||= 50
-		@config[:description_length] ||= 30
-		@config[:comment_length] ||= 30
-		@config[:commit_length] ||= 50
 		try_find_repos
 
 		# some attributes
@@ -79,7 +76,6 @@ class Wit
 			lastcom = repo.commits.first
 			time = [lastcom[:author_time], lastcom[:committer_time]].compact.max
 			info.push(lastcom[:hash], lastcom[:parent].first)
-			info.push(trim(lastcom[:title], @config[:commit_length]))
 			info.push(lastcom[:title], last_update(time))
 			yield(i % 2 == 0 ? 'odd' : 'even', *info)
 		end
@@ -95,15 +91,14 @@ class Wit
 			else
 				time = rawtime.utc.strftime(timefmt) if(rawtime)
 			end
-			title = trim(commit[:title], @config[:commit_length])
-			info = [time, commit[:author] || commit[:committer], title,
+			info = [time, commit[:author] || commit[:committer], commit[:title],
 			        commit[:title], commit[:hash]]
 
 			info = info.map { |c| CGI.escapeHTML(c || '') }
 			if raw
 				info.push(rawtime)
 			else
-				commit_substitutions(info[2])
+				commit_substitutions(info[3])
 			end
 			yield(i % 2 == 0 ? 'odd' : 'even', *info)
 		end
@@ -234,10 +229,6 @@ class Wit
 	end
 
 	private
-
-	def trim(str, len)
-		str.length > len ? str[0..len] + '...' : str
-	end
 
 	def try_find_repos
 		return if(@config[:groups].is_a?(Array))
