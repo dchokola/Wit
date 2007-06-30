@@ -189,6 +189,7 @@ class Wit
 		info.push(['author time', tmp.utc.strftime(timefmt)]) if(tmp)
 		tmp = cominfo[:committer_time]
 		info.push(['committer time', tmp.utc.strftime(timefmt)]) if(tmp)
+		info.push(['commit hash', cominfo[:hash]])
 
 		info.each do |(key, val)|
 			hkey = CGI.escapeHTML(key)
