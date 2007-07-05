@@ -222,6 +222,7 @@ class Wit
 		        ['Name', @name],
 		        ['Description', @repoconfig[:description]],
 		        ['Last updated', last_update(time)]]
+		info.push(['Clone URL', @repoconfig[:clone_url]]) if @repoconfig[:clone_url]
 
 		info.each { |(key, val)| yield(CGI.escapeHTML(key.to_s), CGI.escapeHTML(val.to_s)) }
 	end
