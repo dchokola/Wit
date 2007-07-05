@@ -114,7 +114,8 @@ class Wit
 		commits = @repo.commits(@limit + 1, @head)
 		last = commits ? commits.pop : nil
 
-		yield(last[:hash]) if(last && commits && last[:hash] != commits.last[:hash])
+		yield(last[:hash]) if(last && commits && commits.last &&
+		      last[:hash] != commits.last[:hash])
 	end
 
 	def diff(&block)
@@ -384,7 +385,7 @@ class Repo
 	def commitdata(ary)
 		commit = { :hash => ary.shift.split.last,
 		           :tree => ary.shift.split.last }
-		commit[:parent] = [] if(ary.first.match(/^parent/))
+		commit[:parent] = []
 		commit[:parent].push(ary.shift.split.last) while(ary.first.match(/^parent/))
 
 		writer('author', ary, commit)
