@@ -26,7 +26,7 @@ w = Wit.new%>
 <tr><td class="group" colspan="6"><%=group%></td></tr><%w.repos(group) do |fmt, name, desc, owner, clone, head, parent, commitmsg, updated|%>
 <tr class="<%=fmt%>">
 <td><%=name%></td>
-<td><%=desc%></td>
+<td title="<%=desc%>"><%=desc%></td>
 <td><a class="default" title="<%=commitmsg%>" href="<%=w.path%>/diff.rhtml/<%=group%>/<%=name%>/?head=<%=head%>"><%=commitmsg%></a></td>
 <td><%=owner%></td>
 <td><%=updated%></td>
