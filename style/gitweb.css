@@ -16,8 +16,8 @@ a:link {
 }
 a.feed {
 	float: right;
-	padding: 3px 0px;
-	width: 35px;
+	padding: 3px 3px;
+	width: auto;
 	line-height: 10px;
 	border: 1px solid;
 	border-color: #FCC7A5 #7D3302 #3E1A01 #FF954E;
