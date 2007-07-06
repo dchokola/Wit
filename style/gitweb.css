@@ -120,7 +120,8 @@ div.spacing {
 }
 
 table.main {
-	width: 100%;
+	min-width: 100%;
+	width: auto;
 	padding: 10px 10px 10px 10px;
 	table-layout: fixed;
 }
@@ -136,29 +137,29 @@ table.branches {
 th {
 	text-align: left;
 	vertical-align: middle;
-	padding: 0 8px 0 0;
+	padding: 0 12px 0 0;
 	font-size: 11pt;
 }
 th.description {
-	witdh: 20%;
-}
-th.summary {
-	width: 30%
+	witdh: auto;
 }
 th.long-summary {
-	width: 50%
+	max-width: 100%;
 }
 th.time {
-	width: 10%
+	width: auto;
 }
 
 td {
 	text-align: left;
 	vertical-align: middle;
-	padding: 2px 8px 2px 0;
+	padding: 2px 12px 2px 0;
 	font-size: 9pt;
 	white-space: nowrap;
 	overflow: hidden;
+}
+td.wrap {
+	white-space: normal;
 }
 td.info {
 	text-align: left;

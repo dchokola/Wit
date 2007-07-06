@@ -29,7 +29,7 @@ w = Wit.new%>
 <%w.commits do |fmt, time, author, title, commitmsg, head|%><tr class="<%=fmt%>">
 <td><%=time%></td>
 <td><%=author%></td>
-<td title="<%=title%>"><%=commitmsg%></td>
+<td class="wrap" title="<%=title%>"><%=commitmsg%></td>
 <td><a class="default" href="<%=w.path%>/diff.rhtml/<%=w.group%>/<%=w.name%>/?branch=<%=w.branch%>&amp;head=<%=head%>">diff</a> | <a class="default" href="<%=w.path%>/tree.rhtml/<%=w.group%>/<%=w.name%>/?head=<%=head%>&amp;branch=<%=w.branch%>">tree</a> | <a class="default" href="<%=w.path%>/snapshot.rhtml/<%=w.group%>/<%=w.name%>">snapshot</a></td>
 </tr>
 <%end%></table>
