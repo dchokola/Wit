@@ -106,7 +106,7 @@ class Wit
 
 			info.map! {|str| escape(str)}
 			info[0][:plain] = rawtime
-			info.insert(3, commit_substitutions(info[2][:html]))
+			info.insert(3, commit_substitutions(info[2][:plain]))
 			yield(i % 2 == 0 ? 'odd' : 'even', *info)
 		end
 	end
@@ -194,7 +194,7 @@ class Wit
 		time = last_update(cominfo[:committer_time])
 		info.push(['committer', "#{cominfo[:committer]} <#{tmp}> (#{time})"])
 		tmp = [cominfo[:title], cominfo[:description]].join("\n")
-		info.push(['commit message', commit_substitutions(CGI.escapeHTML(tmp))])
+		info.push(['commit message', commit_substitutions(tmp)])
 		tmp = cominfo[:author_time]
 		info.push(['author time', tmp.utc.strftime(timefmt)]) if(tmp)
 		tmp = cominfo[:committer_time]
@@ -207,15 +207,17 @@ class Wit
 	end
 
 	def commit_substitutions(commit)
-		return unless @repoconfig
+		return unless @repoconfig && commit
+
+		commit = CGI.escapeHTML(commit)
 
 		(@repoconfig[:substitutions] ||= []).each do |sub|
 			next unless sub[:regexp] && sub[:replace]
 			regexp = Regexp.compile(sub[:regexp])
 			if sub[:global]
-				commit.gsub(regexp, sub[:replace].to_s)
+				commit.gsub!(regexp, sub[:replace])
 			else
-				commit.sub(regexp, sub[:replace].to_s)
+				commit.sub!(regexp, sub[:replace])
 			end
 		end
 
