@@ -104,7 +104,6 @@ class Wit
 			        [commit[:title], commit[:description]].join("\n"),
 			        commit[:hash]]
 
-			info = info.map { |c| CGI.escapeHTML(c || '') }
 			info.map! {|str| escape(str)}
 			info[0][:plain] = rawtime
 			info.insert(3, commit_substitutions(info[2][:html]))
@@ -203,7 +202,7 @@ class Wit
 		info.push(['commit hash', cominfo[:hash]])
 
 		info.each do |(key, val)|
-			yield escape(key), escape(val)
+			yield escape(key), key == 'commit message' ? val : escape(val)
 		end
 	end
 

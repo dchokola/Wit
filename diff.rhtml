@@ -17,7 +17,7 @@ w = Wit.new%>
 </div>
 <div class="info">
 <table cellspacing="0" class="info"><%w.commit_info do |key, val|%>
-<tr><td class="info"><%=key[:html]%>:</td><td class="info"><%=key[:plain] == 'commit message' ? val[:html].gsub("\n", '<br/>') : val[:html]%></td></tr><%end%>
+<tr><td class="info"><%=key[:html]%>:</td><td class="info"><%=key[:plain] == 'commit message' ? val.gsub("\n", '<br/>') : val[:html]%></td></tr><%end%>
 </table>
 </div>
 <div class="spacing"><%w.diff do |style, line|%>
