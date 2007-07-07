@@ -46,17 +46,23 @@ class Wit
 		@group = pathinfo.shift || params['group'].first
 		@name = pathinfo.shift || params['name'].first
 		@limit = params['limit'].first || @config[:commits_per_page]
-		@branch = params['branch'].first || 'master'
+		@branch = CGI.unescape(params['branch'].first || 'master')
 		@obj = params['obj'].first || '.'
-		@head = params['head'].first || @branch
+		@head = CGI.unescape(params['head'].first || @branch)
 		@parent = params['parent'].first
+		@parent = CGI.unescape(@parent) if @parent
 
 		attrs = ['title', 'group', 'name', 'limit', 'branch', 'obj', 'head', 'parent']
 		attrs.each do |name|
-			eval("def #{name}\n@#{name} ? CGI.escapeHTML(@#{name}) : @#{name}\nend")
+			str = "
+				def #{name}
+					escape(@#{name}) if @#{name}
+				end"
+			instance_eval(str)
 		end
 
 		if(@group && @name)
+			@group, @name = CGI.unescape(@group), CGI.unescape(@name)
 			group = @config[:groups].find { |grp| grp[:name] == @group }
 			return unless group && repos = group[:repos]
 			@repoconfig = repos.find { |repo| repo[:name] == @name }
@@ -66,7 +72,9 @@ class Wit
 	end
 
 	def groups(&block)
-		@config[:groups].each { |group| yield(group[:name]) }
+		@config[:groups].each do |group|
+			yield(escape(group[:name]))
+		end
 	end
 
 	def repos(group, &block)
@@ -77,11 +85,11 @@ class Wit
 			time = [lastcom[:author_time], lastcom[:committer_time]].compact.max
 			info.push(lastcom[:hash], lastcom[:parent].first)
 			info.push(lastcom[:title], last_update(time))
-			yield(i % 2 == 0 ? 'odd' : 'even', *info)
+			yield(i % 2 == 0 ? 'odd' : 'even', *info.map {|str| escape(str)})
 		end
 	end
 
-	def commits(num = nil, raw = nil, &block)
+	def commits(num = nil, &block)
 		timefmt = @config[:commit_time_format]
 
 		@repo.commits(num || @limit, @head).each_with_index do |commit, i|
@@ -91,22 +99,22 @@ class Wit
 			else
 				time = rawtime.utc.strftime(timefmt) if(rawtime)
 			end
-			info = [time, commit[:author] || commit[:committer], commit[:title],
-			        commit[:title], commit[:hash]]
+			info = [time, commit[:author] || commit[:committer],
+			        commit[:title],
+			        [commit[:title], commit[:description]].join("\n"),
+			        commit[:hash]]
 
 			info = info.map { |c| CGI.escapeHTML(c || '') }
-			if raw
-				info.push(rawtime)
-			else
-				commit_substitutions(info[3])
-			end
+			info.map! {|str| escape(str)}
+			info[0][:plain] = rawtime
+			info.insert(3, commit_substitutions(info[2][:html]))
 			yield(i % 2 == 0 ? 'odd' : 'even', *info)
 		end
 	end
 
 	def branches
 		@repo.branches.each_with_index do |branch, i|
-			yield(i % 2 == 0 ? 'odd' : 'even', CGI.escapeHTML(branch))
+			yield(i % 2 == 0 ? 'odd' : 'even', escape(branch))
 		end
 	end
 
@@ -114,14 +122,14 @@ class Wit
 		commits = @repo.commits(@limit + 1, @head)
 		last = commits ? commits.pop : nil
 
-		yield(last[:hash]) if(last && commits && commits.last &&
+		yield(escape(last[:hash])) if(last && commits && commits.last &&
 		      last[:hash] != commits.last[:hash])
 	end
 
 	def diff(&block)
 		@parent ||= (@repo.commits(1, @head).first[:parent] || []).first
 
-		@repo.diff(head, @parent).map do |line|
+		@repo.diff(@head, @parent).map do |line|
 			style = 'diff'
 
 			case(line)
@@ -133,16 +141,15 @@ class Wit
 					style = 'red'
 			end
 
-			line = CGI.escapeHTML(line.gsub(/\t/, ' ' * @config[:tab_width]))
-			yield(style, line)
+			line.gsub!(/\t/, ' ' * @config[:tab_width])
+			yield(style, escape(line))
 		end
 	end
 
 	def tree(&block)
 		@repo.tree(@head, File.join(@obj, File::SEPARATOR)).each_with_index do |object, i|
 			info = [object[:type], object[:mode], object[:hash], File.basename(object[:name])]
-			info = info.map { |c| CGI.escapeHTML(c || '') }
-			yield(i % 2 == 0 ? 'odd' : 'even', *info)
+			yield(i % 2 == 0 ? 'odd' : 'even', *info.map {|str| escape(str)})
 		end
 	end
 
@@ -150,7 +157,7 @@ class Wit
 		hash = @repo.tree(@head, @obj).first[:hash]
 
 		@repo.blob(hash).each_with_index do |line, i|
-			yield(i + 1, CGI.escapeHTML(line))
+			yield(i + 1, escape(line))
 		end
 	end
 
@@ -160,13 +167,16 @@ class Wit
 		ary.each_with_index do |group, i|
 			hash = ary.find { |a| a[:hash] == group[:hash] }
 			group = hash.merge(group) if hash
-			group.each { |key, value| group[key] = CGI.escapeHTML(value) if value.is_a?(String) }
+			group.each { |key, val| group[key] = escape(val) if val.is_a?(String) }
 			group[:lines].each do |line|
-				line.each { |key, value| line[key] = CGI.escapeHTML(value) if value.is_a?(String) }
+				line.each { |key, val| line[key] = escape(val) if val.is_a?(String) }
 			end
 			author = group[:author] || group[:committer]
-			time = last_update(group[:author_time] || group[:committer_time])
-			yield(i % 2 == 0 ? 'odd' : 'even', author, group[:summary], time, group[:lines])
+			time = group[:author_time] || group[:committer_time]
+			info = [author, group[:summary], escape(last_update(time)),
+			        group[:lines]]
+			info[2][:plain] = time
+			yield(i % 2 == 0 ? 'odd' : 'even', *info)
 		end
 	end
 
@@ -184,7 +194,7 @@ class Wit
 		tmp.sub!('@', ' at ') if @config[:protect_email_addresses] ||= false
 		time = last_update(cominfo[:committer_time])
 		info.push(['committer', "#{cominfo[:committer]} <#{tmp}> (#{time})"])
-		tmp = "#{cominfo[:title]}\n#{cominfo[:description]}".chomp
+		tmp = [cominfo[:title], cominfo[:description]].join("\n")
 		info.push(['commit message', commit_substitutions(CGI.escapeHTML(tmp))])
 		tmp = cominfo[:author_time]
 		info.push(['author time', tmp.utc.strftime(timefmt)]) if(tmp)
@@ -193,9 +203,7 @@ class Wit
 		info.push(['commit hash', cominfo[:hash]])
 
 		info.each do |(key, val)|
-			hkey = CGI.escapeHTML(key)
-			hval = key == 'commit message' ? val : CGI.escapeHTML(val)
-			yield hkey, hval.gsub("\n", '<br/>')
+			yield escape(key), escape(val)
 		end
 	end
 
@@ -206,9 +214,9 @@ class Wit
 			next unless sub[:regexp] && sub[:replace]
 			regexp = Regexp.compile(sub[:regexp])
 			if sub[:global]
-				commit.gsub!(regexp, sub[:replace].to_s)
+				commit.gsub(regexp, sub[:replace].to_s)
 			else
-				commit.sub!(regexp, sub[:replace].to_s)
+				commit.sub(regexp, sub[:replace].to_s)
 			end
 		end
 
@@ -224,7 +232,7 @@ class Wit
 		        ['Last updated', last_update(time)]]
 		info.push(['Clone URL', @repoconfig[:clone_url]]) if @repoconfig[:clone_url]
 
-		info.each { |(key, val)| yield(CGI.escapeHTML(key.to_s), CGI.escapeHTML(val.to_s)) }
+		info.each { |(key, val)| yield(escape(key.to_s), escape(val.to_s)) }
 	end
 
 	def close
@@ -232,6 +240,14 @@ class Wit
 	end
 
 	private
+
+	def escape(str)
+		return {} unless str
+
+		{ :plain => str,
+		  :html => CGI.escapeHTML(str).gsub("\n", '<br/>'),
+		  :url => CGI.escapeHTML(CGI.escape(str)) }
+	end
 
 	def try_find_repos
 		return if(@config[:groups].is_a?(Array))
@@ -417,7 +433,7 @@ class Repo
 		commit[:title] = ary.shift unless(ary.empty? || ary.first.match(/^commit/))
 
 		while(!ary.empty? && !ary.first.match(/^commit/))
-			commit[:description] = [commit[:description], ary.shift].join(' ')
+			commit[:description] = [commit[:description], ary.shift].compact.join("\n")
 		end
 		commit[:description].lstrip if(commit[:description])
 	end

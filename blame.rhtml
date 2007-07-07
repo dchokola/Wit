@@ -6,31 +6,31 @@ w = Wit.new%>
 <head>
 <meta name="robots" content="index, nofollow"/>
 <link rel="stylesheet" type="text/css" href="<%=w.path%>/style/gitweb.css"/>
-<title><%=w.group%>::<%=w.name%>.<%=w.branch%>('<%=w.obj%>')</title>
+<title><%=w.group[:html]%>::<%=w.name[:html]%>.<%=w.branch[:html]%>('<%=w.obj[:html]%>')</title>
 </head>
 <body>
 <div class="header">
 <a href="http://www.kernel.org/pub/software/scm/git/docs/" title="git documentation">
 <img src="<%=w.path%>/images/git.png" alt="git" class="logo"/>
 </a>
-<a href="<%=w.path%>/"><%=w.group%>::<%=w.name%>.<%=w.branch%>('<%=w.obj%>')</a>
+<a href="<%=w.path%>/"><%=w.group[:html]%>::<%=w.name[:html]%>.<%=w.branch[:html]%>('<%=w.obj[:html]%>')</a>
 </div>
 <div class="info">
 <table cellspacing="0" class="info"><%w.repo_info do |key, val|%>
-<tr><td class="info"><%=key%>:</td><td class="info"><%=val%></td></tr><%end%>
+<tr><td class="info"><%=key[:html]%>:</td><td class="info"><%=val[:html]%></td></tr><%end%>
 </table>
 </div>
 <div class="spacing">
 <table cellspacing="0" class="blame">
 <%w.blame do |fmt, author, summary, time, lines|
 lines.each_with_index do |line, i|%><tr class="<%=fmt%>">
-<td><%if i.zero?%><a class="default" title="<%=summary%> (<%=time%>)" href="<%=w.path%>/diff.rhtml/<%=w.group%>/<%=w.name%>/?branch=<%=w.branch%>&amp;head=<%=line[:hash]%>"><%=author%></a><%end%></td><td class="num"><div class="gray"><%=line[:lineno_final]%></div></td><td class="pre"><%=line[:content]%></td>
+<td><%if i.zero?%><a class="default" title="<%=summary[:html]%> (<%=time[:html]%>)" href="<%=w.path%>/diff.rhtml/<%=w.group[:url]%>/<%=w.name[:url]%>/?branch=<%=w.branch[:url]%>&amp;head=<%=line[:hash][:url]%>"><%=author[:html]%></a><%end%></td><td class="num"><div class="gray"><%=line[:lineno_final]%></div></td><td class="pre"><%=line[:content][:html]%></td>
 </tr>
 <%end
 end%></table>
 </div>
 <div class="footer">
-<a class="feed" href="<%=w.path%>/rss.rhtml/<%=w.group%>/<%=w.name%>/?branch=<%=w.branch%>">RSS</a>
+<a class="feed" href="<%=w.path%>/rss.rhtml/<%=w.group[:url]%>/<%=w.name[:url]%>/?branch=<%=w.branch[:url]%>">RSS</a>
 </div>
 </body>
 </html><%w.close%>

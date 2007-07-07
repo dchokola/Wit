@@ -6,29 +6,29 @@ w = Wit.new%>
 <head>
 <meta name="robots" content="index, nofollow"/>
 <link rel="stylesheet" type="text/css" href="<%=w.path%>/style/gitweb.css"/>
-<title><%=w.group%>::<%=w.name%>.<%=w.branch%>('<%=w.obj%>')</title>
+<title><%=w.group[:html]%>::<%=w.name[:html]%>.<%=w.branch[:html]%>('<%=w.obj[:html]%>')</title>
 </head>
 <body>
 <div class="header">
 <a href="http://www.kernel.org/pub/software/scm/git/docs/" title="git documentation">
 <img src="<%=w.path%>/images/git.png" alt="git" class="logo"/>
 </a>
-<a href="<%=w.path%>/"><%=w.group%>::<%=w.name%>.<%=w.branch%>('<%=w.obj%>')</a>
+<a href="<%=w.path%>/"><%=w.group[:html]%>::<%=w.name[:html]%>.<%=w.branch[:html]%>('<%=w.obj[:html]%>')</a>
 </div>
 <div class="info">
 <table cellspacing="0" class="info"><%w.repo_info do |key, val|%>
-<tr><td class="info"><%=key%>:</td><td class="info"><%=val%></td></tr><%end%>
+<tr><td class="info"><%=key[:html]%>:</td><td class="info"><%=val[:html]%></td></tr><%end%>
 </table>
 </div>
 <div class="spacing">
 <table cellspacing="0" class="blob">
 <%w.blob do |i, line|%><tr>
-<td class="num"><div class="gray"><%=i%></div></td><td class="pre"><%=line%></td>
+<td class="num"><div class="gray"><%=i%></div></td><td class="pre"><%=line[:html]%></td>
 </tr>
 <%end%></table>
 </div>
 <div class="footer">
-<a class="feed" href="<%=w.path%>/rss.rhtml/<%=w.group%>/<%=w.name%>/?branch=<%=w.branch%>">RSS</a>
+<a class="feed" href="<%=w.path%>/rss.rhtml/<%=w.group[:url]%>/<%=w.name[:url]%>/?branch=<%=w.branch[:url]%>">RSS</a>
 </div>
 </body>
 </html><%w.close%>

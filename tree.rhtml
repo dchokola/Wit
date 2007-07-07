@@ -6,18 +6,18 @@ w = Wit.new%>
 <head>
 <meta name="robots" content="index, nofollow"/>
 <link rel="stylesheet" type="text/css" href="<%=w.path%>/style/gitweb.css"/>
-<title><%=w.group%>::<%=w.name%>.<%=w.branch%>('<%=w.obj%>')</title>
+<title><%=w.group[:html]%>::<%=w.name[:html]%>.<%=w.branch[:html]%>('<%=w.obj[:html]%>')</title>
 </head>
 <body>
 <div class="header">
 <a href="http://www.kernel.org/pub/software/scm/git/docs/" title="git documentation">
 <img src="<%=w.path%>/images/git.png" alt="git" class="logo"/>
 </a>
-<a href="<%=w.path%>/"><%=w.group%>::<%=w.name%>.<%=w.branch%>('<%=w.obj%>')</a>
+<a href="<%=w.path%>/"><%=w.group[:html]%>::<%=w.name[:html]%>.<%=w.branch[:html]%>('<%=w.obj[:html]%>')</a>
 </div>
 <div class="info">
 <table cellspacing="0" class="info"><%w.repo_info do |key, val|%>
-<tr><td class="info"><%=key%>:</td><td class="info"><%=val%></td></tr><%end%>
+<tr><td class="info"><%=key[:html]%>:</td><td class="info"><%=val[:html]%></td></tr><%end%>
 </table>
 </div>
 <div class="spacing">
@@ -27,20 +27,20 @@ w = Wit.new%>
 <th>Filename</th>
 </tr>
 <%w.tree do |fmt, type, mode, hash, name|%><tr class="<%=fmt%>">
-<td><%=mode%></td>
-<td><a class="default" href="<%=w.path%>/<%=type%>.rhtml/<%=w.group%>/<%=w.name%>/?branch=<%=w.branch%>&amp;head=<%=w.head%>&amp;obj=<%=File.join(w.obj, name)%>"><%=name%></a></td>
-<td><a class="default" href="<%=w.path%>/<%=type%>.rhtml/<%=w.group%>/<%=w.name%>/?branch=<%=w.branch%>&amp;head=<%=w.head%>&amp;obj=<%=File.join(w.obj, name)%>"><%=type == 'blob' ? 'blob' : 'tree'%></a><%if type == 'blob'%> | <a class="default" href="<%=w.path%>/blame.rhtml/<%=w.group%>/<%=w.name%>/?branch=<%=w.branch%>&amp;head=<%=w.head%>&amp;obj=<%=File.join(w.obj, name)%>">blame</a><%end%></td>
+<td><%=mode[:html]%></td>
+<td><a class="default" href="<%=w.path%>/<%=type[:url]%>.rhtml/<%=w.group[:url]%>/<%=w.name[:url]%>/?branch=<%=w.branch[:url]%>&amp;head=<%=w.head[:url]%>&amp;obj=<%=File.join(w.obj[:url], name[:url])%>"><%=name[:html]%></a></td>
+<td><a class="default" href="<%=w.path%>/<%=type[:url]%>.rhtml/<%=w.group[:url]%>/<%=w.name[:url]%>/?branch=<%=w.branch[:url]%>&amp;head=<%=w.head[:url]%>&amp;obj=<%=File.join(w.obj[:url], name[:url])%>"><%=type[:plain] == 'blob' ? 'blob' : 'tree'%></a><%if type[:plain] == 'blob'%> | <a class="default" href="<%=w.path%>/blame.rhtml/<%=w.group[:url]%>/<%=w.name[:url]%>/?branch=<%=w.branch[:url]%>&amp;head=<%=w.head[:url]%>&amp;obj=<%=File.join(w.obj[:url], name[:url])%>">blame</a><%end%></td>
 </tr>
 <%end%></table>
 </div>
 <div class="branches">Branches</div>
 <table cellspacing="0" class="branches"><%w.branches do |fmt, branch|%>
 <tr class="<%=fmt%>"><td class="branch">
-<a href="<%=w.path%>/tree.rhtml/<%=w.group%>/<%=w.name%>/?branch=<%=branch%>"><%=branch%></a>
+<a href="<%=w.path%>/tree.rhtml/<%=w.group[:url]%>/<%=w.name[:url]%>/?branch=<%=branch[:url]%>"><%=branch[:html]%></a>
 </td></tr><%end%>
 </table>
 <div class="footer">
-<a class="feed" href="<%=w.path%>/rss.rhtml/<%=w.group%>/<%=w.name%>/?branch=<%=w.branch%>">RSS</a>
+<a class="feed" href="<%=w.path%>/rss.rhtml/<%=w.group[:url]%>/<%=w.name[:url]%>/?branch=<%=w.branch[:url]%>">RSS</a>
 </div>
 </body>
 </html><%w.close%>

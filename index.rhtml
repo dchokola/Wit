@@ -6,14 +6,14 @@ w = Wit.new%>
 <head>
 <meta name="robots" content="index, nofollow"/>
 <link rel="stylesheet" type="text/css" href="<%=w.path%>/style/gitweb.css"/>
-<title><%=w.title%></title>
+<title><%=w.title[:html]%></title>
 </head>
 <body>
 <div class="header">
 <a href="http://www.kernel.org/pub/software/scm/git/docs/" title="git documentation">
 <img src="<%=w.path%>/images/git.png" alt="git" class="logo"/>
 </a>
-<a href="<%=w.path%>/"><%=w.title%></a>
+<a href="<%=w.path%>/"><%=w.title[:html]%></a>
 </div>
 <table cellspacing="0" class="main">
 <tr>
@@ -23,14 +23,14 @@ w = Wit.new%>
 <th>Owner</th>
 <th class="time">Updated</th>
 </tr><%w.groups do |group|%>
-<tr><td class="group" colspan="6"><%=group%></td></tr><%w.repos(group) do |fmt, name, desc, owner, clone, head, parent, commitmsg, updated|%>
+<tr><td class="group" colspan="6"><%=group[:html]%></td></tr><%w.repos(group[:plain]) do |fmt, name, desc, owner, clone, head, parent, title, updated|%>
 <tr class="<%=fmt%>">
-<td><%=name%></td>
-<td class="wrap" title="<%=desc%>"><%=desc%></td>
-<td class="wrap"><a class="default" title="<%=commitmsg%>" href="<%=w.path%>/diff.rhtml/<%=group%>/<%=name%>/?head=<%=head%>"><%=commitmsg%></a></td>
-<td><%=owner%></td>
-<td><%=updated%></td>
-<td><a class="default" href="<%=w.path%>/commits.rhtml/<%=group%>/<%=name%>">commits</a> | <a class="default" href="<%=w.path%>/tree.rhtml/<%=group%>/<%=name%>">tree</a> | <a class="default" href="<%=w.path%>/snapshot.rhtml/<%=group%>/<%=name%>">snapshot</a><%if clone%> | <a class="default" href="<%=clone%>">clone</a><%end%></td>
+<td><%=name[:html]%></td>
+<td class="wrap" title="<%=desc[:html]%>"><%=desc[:html]%></td>
+<td class="wrap"><a class="default" title="<%=title[:html]%>" href="<%=w.path%>/diff.rhtml/<%=group[:url]%>/<%=name[:url]%>/?head=<%=head[:url]%>"><%=title[:html]%></a></td>
+<td><%=owner[:html]%></td>
+<td><%=updated[:html]%></td>
+<td><a class="default" href="<%=w.path%>/commits.rhtml/<%=group[:url]%>/<%=name[:url]%>">commits</a> | <a class="default" href="<%=w.path%>/tree.rhtml/<%=group[:url]%>/<%=name[:url]%>">tree</a> | <a class="default" href="<%=w.path%>/snapshot.rhtml/<%=group[:url]%>/<%=name[:url]%>">snapshot</a><%if clone%> | <a class="default" href="<%=clone[:url]%>">clone</a><%end%></td>
 </tr><%end
 end%>
 </table>
