@@ -30,7 +30,7 @@ w = Wit.new%>
 <td class="wrap"><a class="default" title="<%=title[:html]%>" href="<%=w.path%>/diff.rhtml/<%=group[:url]%>/<%=name[:url]%>/?head=<%=head[:url]%>"><%=title[:html]%></a></td>
 <td><%=owner[:html]%></td>
 <td><%=updated[:html]%></td>
-<td><a class="default" href="<%=w.path%>/commits.rhtml/<%=group[:url]%>/<%=name[:url]%>">commits</a> | <a class="default" href="<%=w.path%>/tree.rhtml/<%=group[:url]%>/<%=name[:url]%>">tree</a> | <a class="default" href="<%=w.path%>/snapshot.rhtml/<%=group[:url]%>/<%=name[:url]%>">snapshot</a><%if clone%> | <a class="default" href="<%=clone[:url]%>">clone</a><%end%></td>
+<td><a class="default" href="<%=w.path%>/commits.rhtml/<%=group[:url]%>/<%=name[:url]%>">commits</a> | <a class="default" href="<%=w.path%>/tree.rhtml/<%=group[:url]%>/<%=name[:url]%>">tree</a> | <a class="default" href="<%=w.path%>/snapshot.rhtml/<%=group[:url]%>/<%=name[:url]%>">snapshot</a><%if clone%> | <a class="default" href="<%=clone[:html]%>">clone</a><%end%></td>
 </tr><%end
 end%>
 </table>
