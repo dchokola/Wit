@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class Git
 	attr_accessor(:git_dir)
 

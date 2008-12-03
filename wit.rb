@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require 'cgi'
 require 'yaml'
 
@@ -315,11 +317,16 @@ class Repo
 		commits = []
 
 		if(num > 0)
-			ary = @git.rev_list('-n', num, '--pretty=raw', start).split("\n")
+			str = @git.rev_list('-n', num, '--pretty=raw', start)
 		else
-			ary = @git.rev_list('--pretty=raw', start).split("\n")
+			str = @git.rev_list('--pretty=raw', start)
 		end
-		ary = ary.map { |s| s.strip }.delete_if { |a| a.nil? || a.empty? }
+
+		str = str.force_encoding('UTF-8') if(defined?(RUBY_VERSION)) # Ruby 1.9+
+
+		ary = str.split("\n").map { |s| s.strip }.delete_if do |a|
+			a.nil? || a.empty?
+		end
 
 		commits.push(commitdata(ary)) while(!ary.empty?)
 
