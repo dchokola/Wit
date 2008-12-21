@@ -116,7 +116,28 @@ class Wit
 	end
 
 	def branches
-		@repo.branches.each_with_index do |branch, i|
+		local = @repo.branches((@repoconfig[:track_local] ||= true), false)
+		remote = @repo.branches(false, (@repoconfig[:track_remotes] ||= false))
+
+		if(@repoconfig[:local_include_regexp])
+			lireg = Regexp.compile(@repoconfig[:local_include_regexp])
+			local.delete_if { |branch| !branch.match(lireg) }
+		end
+		if(@repoconfig[:local_exclude_regexp])
+			lxreg = Regexp.compile(@repoconfig[:local_exclude_regexp])
+			local.delete_if { |branch| branch.match(lxreg) }
+		end
+
+		if(@repoconfig[:remote_include_regexp])
+			rireg = Regexp.compile(@repoconfig[:remote_include_regexp])
+			remote.delete_if { |branch| !branch.match(rireg) }
+		end
+		if(@repoconfig[:remote_exclude_regexp])
+			rxreg = Regexp.compile(@repoconfig[:remote_exclude_regexp])
+			remote.delete_if { |branch| branch.match(rxreg) }
+		end
+
+		(local + remote).each_with_index do |branch, i|
 			yield(i % 2 == 0 ? 'odd' : 'even', escape(branch))
 		end
 	end
@@ -342,8 +363,16 @@ class Repo
 		commits
 	end
 
-	def branches
-		res = @git.branch
+	def branches(local = true, remote = false)
+		if(local && remote)
+			res = @git.branch('-a')
+		elsif(remote)
+			res = @git.branch('-r')
+		elsif local
+			res = @git.branch
+		else
+			return []
+		end
 
 		return [] unless res.last.success?
 

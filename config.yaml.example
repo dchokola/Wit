@@ -15,7 +15,7 @@
   - :name: Bar # The Bar repository.
     :path: ~/git/bar/.git/
     :owner: You
-    :description: Implements Barclass
+    :description: Implements Barclass (topic branches)
     # The replacement feature allows the commit messages in commit view to be
     # substituted. This is a great help for things like bugtracker integration.
     # In this example, a string like ISSUE #42 becomes a hyperlink to the issue
@@ -24,3 +24,17 @@
       # Replacement string; may contain backreferences.
       :replace: "\1 #<a href="http://my.project/bugtracker/?id=\2">\2</a>"
       :global: true # Substitute globally?
+    # You can choose to track local, remote, or both types of branches.
+    # By default, only local branches are tracked.
+    :track_local: true
+    :track_remotes: false
+    # Using regular expressions, you can define a set of branches you'd like to
+    # track or ignore. Local and remote branches can be configured separately.
+    # By default, all branches are included according to the track_local and
+    # track_remotes settings above. This feature works well with similarly-named
+    # branches. For the example, below, assume a tree with several branches
+    # named topic-X, where X is a wildcard, mixed in with other branches.
+    :local_include_regexp: ^topic-.+ # will match topic-X branches only
+    :local_exclude_regexp: nil
+    :remote_include_regexp: nil
+    :remote_exclude_regexp: nil
