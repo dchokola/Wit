@@ -84,9 +84,11 @@ class Wit
 			repo = Repo.new(@config[:git_bin], repinfo[:path])
 			info = repinfo.values_at(:name, :description, :owner, :clone_url)
 			lastcom = repo.commits.first
-			time = [lastcom[:author_time], lastcom[:committer_time]].compact.max
-			info.push(lastcom[:hash], lastcom[:parent].first)
-			info.push(lastcom[:title], last_update(time))
+			if(lastcom)
+				time = [lastcom[:author_time], lastcom[:committer_time]].compact.max
+				info.push(lastcom[:hash], lastcom[:parent].first)
+				info.push(lastcom[:title], last_update(time))
+			end
 			yield(i % 2 == 0 ? 'odd' : 'even', *info.map {|str| escape(str)})
 		end
 	end
@@ -228,11 +230,15 @@ class Wit
 
 	def repo_info(&block)
 		commit = @repo.commits.first
-		time = [commit[:author_time], commit[:committer_time]].compact.max
+		if(commit)
+			time = [commit[:author_time], commit[:committer_time]].compact.max
+		else
+			time = nil
+		end
 		info = [['Group', @group],
 		        ['Name', @name],
-		        ['Description', @repoconfig[:description]],
-		        ['Last updated', last_update(time)]]
+		        ['Description', @repoconfig[:description]]]
+		info.push(['Last updated', last_update(time)]) if(time)
 		info.push(['Clone URL', @repoconfig[:clone_url]]) if @repoconfig[:clone_url]
 
 		info.each { |(key, val)| yield(escape(key.to_s), escape(val.to_s)) }
