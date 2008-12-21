@@ -317,11 +317,14 @@ class Repo
 		commits = []
 
 		if(num > 0)
-			str = @git.rev_list('-n', num, '--pretty=raw', start)
+			res = @git.rev_list('-n', num, '--pretty=raw', start)
 		else
-			str = @git.rev_list('--pretty=raw', start)
+			res = @git.rev_list('--pretty=raw', start)
 		end
 
+		return [] unless res.last.success?
+
+		str = res.first
 		str = str.force_encoding('UTF-8') if(defined?(RUBY_VERSION)) # Ruby 1.9+
 
 		ary = str.split("\n").map { |s| s.strip }.delete_if do |a|
@@ -334,15 +337,27 @@ class Repo
 	end
 
 	def branches
-		@git.branch.split("\n").map { |b| b.sub(/\*/, '').lstrip }
+		res = @git.branch
+
+		return [] unless res.last.success?
+
+		res.first.split("\n").map { |b| b.sub(/\*/, '').lstrip }
 	end
 
 	def diff(head, parent)
-		@git.diff(parent || head, head).split("\n") || []
+		res = @git.diff(parent || head, head)
+
+		return [] unless res.last.success?
+
+		res.first.split("\n") || []
 	end
 
 	def tree(head, tree)
-		@git.ls_tree(head, tree).split("\n").map do |obj|
+		res = @git.ls_tree(head, tree)
+
+		return [] unless res.last.success?
+
+		res.first.split("\n").map do |obj|
 			# we can't just split here since the filename could have spaces
 			ary = obj.match(/^(\d+)\s+(\w+)\s+(.*?)\s+(.*)$/).to_a
 			ary.shift
@@ -355,14 +370,20 @@ class Repo
 	end
 
 	def blob(obj)
-		@git.cat_file('-p', obj).split("\n")
+		res = @git.cat_file('-p', obj)
+
+		return [] unless res.last.success?
+
+		res.first.split("\n")
 	end
 
 	def blame(head, obj)
-		data = @git.blame('-p', '--since', head, '--', obj).split("\n")
+		res = @git.blame('-p', '--since', head, '--', obj)
 		blames = []
 
-		data.each do |line|
+		return blames unless res.last.success?
+
+		res.first.split("\n").each do |line|
 			ary = line.split(/\s+/)
 
 			case ary.first
