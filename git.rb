@@ -9,6 +9,10 @@ class Git
 	end
 
 	def method_missing(cmd, *opts)
-		[`#{@git_bin} --git-dir='#{@git_dir}' #{cmd.to_s.gsub('_', '-')} #{opts.join(' ')} 2>&1`, $?]
+		ret = `#{@git_bin} --git-dir='#{@git_dir}' #{cmd.to_s.gsub('_', '-')} #{opts.join(' ')} 2>&1`
+
+		ret.force_encoding('binary') if(ret.respond_to?(:force_encoding))
+
+		[ret, $?]
 	end
 end

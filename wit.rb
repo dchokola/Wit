@@ -351,10 +351,7 @@ class Repo
 
 		return [] unless res.last.success?
 
-		str = res.first
-		str = str.force_encoding('UTF-8') if(defined?(RUBY_VERSION)) # Ruby 1.9+
-
-		ary = str.split("\n").map { |s| s.strip }.delete_if do |a|
+		ary = res.first.split("\n").map { |s| s.strip }.delete_if do |a|
 			a.nil? || a.empty?
 		end
 
