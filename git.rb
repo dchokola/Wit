@@ -9,10 +9,18 @@ class Git
 	end
 
 	def method_missing(cmd, *opts)
-		ret = `#{@git_bin} --git-dir='#{@git_dir}' #{cmd.to_s.gsub('_', '-')} #{opts.join(' ')} 2>&1`
+		ret = `#{@git_bin} --git-dir='#{@git_dir}' #{cmd.to_s.gsub('_', '-')} #{opts.map {|str| quote(str.to_s)}.join(' ')} 2>&1`.chomp
 
 		ret.force_encoding('binary') if(ret.respond_to?(:force_encoding))
 
 		[ret, $?]
+	end
+
+	private
+
+	def quote(str)
+		str = "'#{str}'" unless str.match(/^['"].*['"]$/)
+
+		str
 	end
 end
