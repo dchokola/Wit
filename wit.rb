@@ -450,8 +450,8 @@ class Repo
 					blames.last[:filename] = ary.last
 				when /summary/
 					blames.last[:summary] = line.sub(/summary\s+/, '')
-				when ''
-					blames.last[:lines].last[:content] = line[1..-1]
+				else
+					blames.last[:lines].last[:content] = line[1..-1] || ''
 			end
 		end
 
